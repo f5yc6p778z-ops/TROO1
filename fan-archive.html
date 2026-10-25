@@ -187,7 +187,7 @@
           <div>
             <div class="team-line"><span class="team-dot"></span><span id="player-team"></span><span>·</span><span id="player-league"></span><span class="fan-badge" id="fan-badge"></span></div>
             <h2 class="player-name"><span id="player-name"></span><small id="player-number"></small></h2>
-            <div class="player-bio"><span id="player-position"></span><span id="player-age"></span><span id="player-origin"></span></div>
+            <div class="player-bio"><span id="player-position"></span><span id="player-age"></span><span id="player-hand"></span></div>
           </div>
           <div class="hero-bottom">
             <div class="connection">
@@ -214,11 +214,11 @@
       <section class="view" id="view-overview" role="tabpanel" aria-labelledby="tab-overview" data-panel="overview">
         <div class="overview-grid">
           <section aria-labelledby="stats-heading">
-            <div class="section-heading"><h2 id="stats-heading">이번 시즌 기록</h2><span id="stats-season">예시 데이터</span></div>
+            <div class="section-heading"><h2 id="stats-heading">이번 시즌 공식 기록</h2><span id="stats-season">KBO 공식 기록실</span></div>
             <div class="stat-grid" id="stat-grid"></div>
           </section>
           <section aria-labelledby="schedule-heading">
-            <div class="section-heading"><h2 id="schedule-heading">다가오는 일정</h2><span>일정 보기 →</span></div>
+            <div class="section-heading"><h2 id="schedule-heading">이번 달 일정·결과</h2><span id="schedule-month"></span></div>
             <div class="schedule-list" id="schedule-list"></div>
           </section>
         </div>
@@ -227,7 +227,7 @@
           <button class="fan-metric" id="add-visit" type="button" title="직관 기록 추가"><span class="metric-symbol">+</span><div><strong id="visit-count">0</strong><span>직관 횟수 · 기록 추가</span></div></button>
           <div class="fan-metric"><span class="metric-symbol">★</span><div><strong id="first-moment">아직</strong><span>첫 응원 기록</span></div></div>
         </div>
-        <p class="section-note">기록과 일정은 기능 확인용 예시입니다. 내가 기억하는 순간과 사진을 더하면 나만의 팬 연대기가 완성됩니다.</p>
+        <p class="section-note" id="data-source-note">선수 명단·성적·경기 일정은 KBO 공식 공개 자료에서 불러옵니다.</p>
       </section>
 
       <section class="view" id="view-story" role="tabpanel" aria-labelledby="tab-story" data-panel="story" hidden>
@@ -258,7 +258,7 @@
       <section class="view" id="view-profile" role="tabpanel" aria-labelledby="tab-profile" data-panel="profile" hidden>
         <div class="section-heading"><h2>선수 프로필</h2><span>공개 프로필 예시</span></div>
         <div class="profile-grid" id="profile-grid"></div>
-        <p class="profile-note">주소·연락처 등 민감한 개인정보는 다루지 않습니다. 나이와 선수 소개는 공개 프로필을 전제로 한 예시이며, 실제 사용 시 데이터 제공처를 연결해야 합니다.</p>
+        <p class="profile-note">표시 항목은 KBO가 공개한 선수 등록 정보입니다. 주소·연락처 등 민감한 개인정보는 수집하지 않습니다.</p>
       </section>
 
       <p class="privacy">사진, 응원 시작일, 방문 횟수, 메모는 이 브라우저의 IndexedDB에 저장되며 외부 서버로 전송되지 않습니다. 브라우저 데이터나 사이트 저장 공간을 삭제하면 함께 지워질 수 있습니다.</p>
@@ -272,44 +272,20 @@
   </dialog>
 
   <script>
-    const catalog = [
-      { id: 'baseball', name: '야구', league: 'KBO', teams: [
-        { id: 'lg', name: 'LG 트윈스', players: [
-          { id: 'lg-austin', name: '오스틴 딘', number: '#23', position: '내야수 · 1루수', birth: '1993-10-14', origin: '미국', height: '178 cm', debut: '2023년 KBO 데뷔', stats: [['타율', '.319'], ['홈런', '32'], ['타점', '132'], ['OPS', '.957']], schedule: [['10.28', 'vs 두산 베어스', '잠실야구장', '예정'], ['10.30', 'vs KT 위즈', '수원 KT위즈파크', '예정'], ['11.02', 'vs 삼성 라이온즈', '대구 삼성라이온즈파크', '예정']] },
-          { id: 'lg-hong', name: '홍창기', number: '#51', position: '외야수 · 우익수', birth: '1993-11-21', origin: '대한민국', height: '189 cm', debut: '2016년 KBO 데뷔', stats: [['타율', '.336'], ['안타', '176'], ['출루율', '.447'], ['도루', '10']], schedule: [['10.28', 'vs 두산 베어스', '잠실야구장', '예정'], ['10.30', 'vs KT 위즈', '수원 KT위즈파크', '예정'], ['11.02', 'vs 삼성 라이온즈', '대구 삼성라이온즈파크', '예정']] },
-        ] },
-        { id: 'kia', name: 'KIA 타이거즈', players: [
-          { id: 'kia-naseongbeom', name: '나성범', number: '#47', position: '외야수 · 우익수', birth: '1989-10-03', origin: '대한민국', height: '183 cm', debut: '2012년 KBO 데뷔', stats: [['타율', '.310'], ['홈런', '21'], ['타점', '80'], ['OPS', '.914']], schedule: [['10.27', 'vs SSG 랜더스', '광주-기아 챔피언스 필드', '예정'], ['10.29', 'vs 롯데 자이언츠', '사직야구장', '예정'], ['11.01', 'vs NC 다이노스', '창원NC파크', '예정']] },
-        ] },
-      ] },
-      { id: 'soccer', name: '축구', league: '해외축구', teams: [
-        { id: 'spurs', name: '토트넘 홋스퍼', players: [
-          { id: 'spurs-son', name: '손흥민', number: '#7', position: '공격수 · 윙어', birth: '1992-07-08', origin: '대한민국', height: '183 cm', debut: '프로 데뷔 2010년', stats: [['출전', '30'], ['득점', '17'], ['도움', '10'], ['슈팅 정확도', '48%']], schedule: [['10.28', 'vs 웨스트햄', '토트넘 홋스퍼 스타디움', '예정'], ['11.01', 'vs 맨체스터 시티', '에티하드 스타디움', '예정'], ['11.05', 'vs 아스널', '토트넘 홋스퍼 스타디움', '예정']] },
-        ] },
-        { id: 'psg', name: '파리 생제르맹', players: [
-          { id: 'psg-lee', name: '이강인', number: '#19', position: '미드필더 · 윙어', birth: '2001-02-19', origin: '대한민국', height: '174 cm', debut: '프로 데뷔 2018년', stats: [['출전', '26'], ['득점', '6'], ['도움', '5'], ['패스 성공률', '91%']], schedule: [['10.29', 'vs 릴', '파르크 데 프랭스', '예정'], ['11.02', 'vs 모나코', '스타드 루이 II', '예정'], ['11.06', 'vs 마르세유', '파르크 데 프랭스', '예정']] },
-        ] },
-      ] },
-      { id: 'basketball', name: '농구', league: 'NBA', teams: [
-        { id: 'warriors', name: '골든스테이트 워리어스', players: [
-          { id: 'gsw-curry', name: '스테픈 커리', number: '#30', position: '가드 · PG', birth: '1988-03-14', origin: '미국', height: '188 cm', debut: 'NBA 데뷔 2009년', stats: [['경기당 득점', '23.4'], ['리바운드', '4.5'], ['어시스트', '6.1'], ['3점 성공률', '40.8%']], schedule: [['10.27', 'vs LA 레이커스', '체이스 센터', '예정'], ['10.30', 'vs 피닉스 선즈', '풋프린트 센터', '예정'], ['11.03', 'vs 보스턴 셀틱스', '체이스 센터', '예정']] },
-        ] },
-        { id: 'lakers', name: 'LA 레이커스', players: [
-          { id: 'lal-lebron', name: '르브론 제임스', number: '#23', position: '포워드 · SF', birth: '1984-12-30', origin: '미국', height: '206 cm', debut: 'NBA 데뷔 2003년', stats: [['경기당 득점', '25.7'], ['리바운드', '7.3'], ['어시스트', '8.3'], ['야투 성공률', '54.0%']], schedule: [['10.27', 'vs 골든스테이트', '체이스 센터', '예정'], ['10.31', 'vs 새크라멘토 킹스', '크립토닷컴 아레나', '예정'], ['11.04', 'vs 마이애미 히트', '카세야 센터', '예정']] },
-        ] },
-      ] },
-    ];
+    const catalog = [{ id: 'baseball', name: '야구', league: 'KBO' }];
+    const currentSeason = new Date().getFullYear();
 
     const ui = {
       sport: document.querySelector('#sport-select'), team: document.querySelector('#team-select'), player: document.querySelector('#player-select'),
       name: document.querySelector('#player-name'), number: document.querySelector('#player-number'), teamName: document.querySelector('#player-team'),
       league: document.querySelector('#player-league'), position: document.querySelector('#player-position'), age: document.querySelector('#player-age'),
       fanBadge: document.querySelector('#fan-badge'),
-      origin: document.querySelector('#player-origin'), initials: document.querySelector('#portrait-initials'), portrait: document.querySelector('#portrait'),
+      hand: document.querySelector('#player-hand'), initials: document.querySelector('#portrait-initials'), portrait: document.querySelector('#portrait'),
       followDate: document.querySelector('#follow-date'), followDays: document.querySelector('#follow-days'), followSince: document.querySelector('#follow-since-copy'),
       stats: document.querySelector('#stat-grid'), schedule: document.querySelector('#schedule-list'), visits: document.querySelector('#visit-count'),
       momentCount: document.querySelector('#moment-count'), firstMoment: document.querySelector('#first-moment'), timeline: document.querySelector('#timeline'),
       gallery: document.querySelector('#gallery'), galleryCount: document.querySelector('#gallery-count'), profile: document.querySelector('#profile-grid'),
+      statsSeason: document.querySelector('#stats-season'), scheduleMonth: document.querySelector('#schedule-month'), dataSourceNote: document.querySelector('#data-source-note'),
       addVisit: document.querySelector('#add-visit'),
       form: document.querySelector('#moment-form'), date: document.querySelector('#moment-date'), type: document.querySelector('#moment-type'), text: document.querySelector('#moment-text'),
       photos: document.querySelector('#moment-photos'), tabs: [...document.querySelectorAll('[data-view]')], panels: [...document.querySelectorAll('[data-panel]')],
@@ -320,9 +296,13 @@
     const STORE_NAME = 'records';
     let dbPromise;
     let currentPlayer;
+    let rosterPlayers = [];
+    let selectionVersion = 0;
     let currentTeam;
     let currentSport;
     let record;
+    let currentStats;
+    let currentSchedule;
     let imageUrls = [];
 
     function openDatabase() {
@@ -370,6 +350,13 @@
 
     function initials(name) { return name.replace(/\s+/g, '').slice(0, 2); }
 
+    async function fetchJson(path) {
+      const response = await fetch(path, { headers: { Accept: 'application/json' } });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || '공식 자료를 불러오지 못했습니다.');
+      return payload;
+    }
+
     function setOptions(select, items, selectedId) {
       select.replaceChildren(...items.map((item) => {
         const option = document.createElement('option');
@@ -380,22 +367,91 @@
       select.value = selectedId ?? items[0]?.id ?? '';
     }
 
-    function populateTeams() {
-      currentSport = catalog.find((sport) => sport.id === ui.sport.value) ?? catalog[0];
-      setOptions(ui.team, currentSport.teams, currentSport.teams[0].id);
-      populatePlayers();
+    async function populateTeams() {
+      const version = ++selectionVersion;
+      currentSport = catalog[0];
+      ui.team.disabled = true;
+      ui.player.disabled = true;
+      setOptions(ui.team, [{ id: '', name: '구단 불러오는 중…' }], '');
+      try {
+        const result = await fetchJson('/api/kbo/teams');
+        if (version !== selectionVersion) return;
+        currentSport.teams = result.teams;
+        ui.league.textContent = 'KBO';
+        setOptions(ui.team, currentSport.teams, currentSport.teams[0]?.id);
+        ui.team.disabled = false;
+        await populatePlayers();
+      } catch (error) {
+        showLoadError(error);
+      }
     }
 
-    function populatePlayers() {
-      currentTeam = currentSport.teams.find((team) => team.id === ui.team.value) ?? currentSport.teams[0];
-      setOptions(ui.player, currentTeam.players, currentTeam.players[0].id);
-      selectPlayer();
+    async function populatePlayers() {
+      const version = ++selectionVersion;
+      currentTeam = currentSport.teams.find((team) => team.id === ui.team.value);
+      if (!currentTeam) return;
+      ui.player.disabled = true;
+      setOptions(ui.player, [{ id: '', name: '등록 선수 불러오는 중…' }], '');
+      try {
+        const result = await fetchJson(`/api/kbo/roster?team=${encodeURIComponent(currentTeam.id)}`);
+        if (version !== selectionVersion) return;
+        rosterPlayers = result.players;
+        if (!rosterPlayers.length) {
+          setOptions(ui.player, [{ id: '', name: '현재 등록 선수 없음' }], '');
+          ui.player.disabled = true;
+          showLoadError(new Error(`${currentTeam.name}의 현재 1군 등록 명단이 비어 있습니다.`));
+          return;
+        }
+        setOptions(ui.player, rosterPlayers.map((player) => ({ ...player, name: `${player.name} ${player.number}` })), rosterPlayers[0].id);
+        ui.player.disabled = false;
+        await selectPlayer(version);
+      } catch (error) {
+        if (version === selectionVersion) showLoadError(error);
+      }
     }
 
-    async function selectPlayer() {
-      currentPlayer = currentTeam.players.find((player) => player.id === ui.player.value) ?? currentTeam.players[0];
-      record = await readRecord(currentPlayer.id);
-      renderPlayer();
+    async function selectPlayer(version = ++selectionVersion) {
+      currentPlayer = rosterPlayers.find((player) => player.id === ui.player.value);
+      if (!currentPlayer) return;
+      ui.name.textContent = currentPlayer.name;
+      ui.stats.replaceChildren();
+      ui.schedule.replaceChildren();
+      ui.stats.innerHTML = '<div class="empty-state" style="grid-column:1/-1">KBO 공식 기록을 불러오는 중…</div>';
+      ui.schedule.innerHTML = '<div class="empty-state">공식 일정을 불러오는 중…</div>';
+      try {
+        const results = await Promise.allSettled([
+          readRecord(currentPlayer.id),
+          fetchJson(`/api/kbo/stats?team=${encodeURIComponent(currentTeam.id)}&playerId=${encodeURIComponent(currentPlayer.id)}&type=${currentPlayer.type}&season=${currentSeason}`),
+          fetchJson(`/api/kbo/schedule?team=${encodeURIComponent(currentTeam.id)}&month=${currentSeason}${String(new Date().getMonth() + 1).padStart(2, '0')}`),
+        ]);
+        if (version !== selectionVersion) return;
+        record = results[0].status === 'fulfilled'
+          ? results[0].value
+          : { playerId: currentPlayer.id, followDate: '', visits: 0, moments: [], portrait: null };
+        currentStats = results[1].status === 'fulfilled'
+          ? results[1].value
+          : { season: currentSeason, values: [], source: '조회 실패', error: results[1].reason?.message };
+        currentSchedule = results[2].status === 'fulfilled'
+          ? results[2].value
+          : { month: `${currentSeason}${String(new Date().getMonth() + 1).padStart(2, '0')}`, games: [], error: results[2].reason?.message };
+        renderPlayer();
+      } catch (error) {
+        if (version === selectionVersion) showLoadError(error);
+      }
+    }
+
+    function showLoadError(error) {
+      ui.name.textContent = currentPlayer?.name || 'KBO 공식 자료';
+      const statsError = document.createElement('div');
+      statsError.className = 'empty-state';
+      statsError.style.gridColumn = '1 / -1';
+      statsError.textContent = error.message;
+      ui.stats.replaceChildren(statsError);
+      const scheduleError = document.createElement('div');
+      scheduleError.className = 'empty-state';
+      scheduleError.textContent = '일정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
+      ui.schedule.replaceChildren(scheduleError);
+      ui.dataSourceNote.textContent = '공식 자료 연결에 실패했습니다. 확인을 위해 페이지를 새로고침해 주세요.';
     }
 
     function clearImageUrls() {
@@ -411,25 +467,29 @@
     }
 
     function renderPlayer() {
+      const stats = currentStats ?? { season: currentSeason, values: [], source: 'KBO 공식 기록실' };
+      const schedule = currentSchedule ?? { month: `${currentSeason}${String(new Date().getMonth() + 1).padStart(2, '0')}`, games: [] };
       clearImageUrls();
       ui.name.textContent = currentPlayer.name;
       ui.number.textContent = currentPlayer.number;
       ui.teamName.textContent = currentTeam.name;
       ui.league.textContent = currentSport.league;
       ui.position.textContent = currentPlayer.position;
-      ui.age.textContent = calculateAge(currentPlayer.birth);
-      ui.origin.textContent = currentPlayer.origin;
+      ui.age.textContent = currentPlayer.birth ? calculateAge(currentPlayer.birth) : '생년월일 미공개';
+      ui.hand.textContent = currentPlayer.hand || '';
       ui.initials.textContent = initials(currentPlayer.name);
       ui.followDate.value = record.followDate || '';
       ui.date.value = new Date().toISOString().slice(0, 10);
       renderPortrait();
       renderConnection();
-      renderStats();
-      renderSchedule();
+      renderStats(stats);
+      renderSchedule(schedule);
       renderFanSummary();
       renderTimeline();
       renderGallery();
       renderProfile();
+      const fetchedAt = stats.fetchedAt || schedule.fetchedAt;
+      ui.dataSourceNote.textContent = `KBO 공식 선수등록 명단 · ${stats.source || 'KBO 공식 기록실'}${fetchedAt ? ` · ${fetchedAt.replace('T', ' ')}` : ''}`;
     }
 
     function renderPortrait() {
@@ -468,8 +528,14 @@
       return moments || record.visits ? '응원 여정의 시작' : '첫 장을 기다리는 중';
     }
 
-    function renderStats() {
-      ui.stats.replaceChildren(...currentPlayer.stats.map(([label, value]) => {
+    function renderStats(stats) {
+      ui.statsSeason.textContent = `${stats.season || currentSeason} 정규시즌 · KBO`;
+      if (!stats.values?.length) {
+        const message = stats.error || '이 선수의 해당 시즌 공식 성적이 아직 없습니다.';
+        ui.stats.innerHTML = `<div class="empty-state" style="grid-column:1/-1">${message}</div>`;
+        return;
+      }
+      ui.stats.replaceChildren(...stats.values.map(({ label, value }) => {
         const item = document.createElement('div');
         item.className = 'stat';
         const title = document.createElement('span');
@@ -483,24 +549,30 @@
       }));
     }
 
-    function renderSchedule() {
-      ui.schedule.replaceChildren(...currentPlayer.schedule.map(([date, event, place, status]) => {
+    function renderSchedule(schedule) {
+      ui.scheduleMonth.textContent = `${Number(schedule.month.slice(4, 6))}월 · KBO 공식 일정`;
+      if (!schedule.games?.length) {
+        const message = schedule.error || '이 달에 확인된 경기 일정이 없습니다.';
+        ui.schedule.innerHTML = `<div class="empty-state">${message}</div>`;
+        return;
+      }
+      ui.schedule.replaceChildren(...schedule.games.map((game) => {
         const row = document.createElement('div');
         row.className = 'schedule-row';
         const dateNode = document.createElement('span');
         dateNode.className = 'schedule-date';
-        dateNode.textContent = date;
+        dateNode.textContent = formatDate(game.date, { month: 'numeric', day: 'numeric' });
         const details = document.createElement('div');
         const eventNode = document.createElement('div');
         eventNode.className = 'schedule-event';
-        eventNode.textContent = event;
+        eventNode.textContent = `${game.time ? `${game.time} · ` : ''}${game.event}${game.score ? ` · ${game.score}` : ''}`;
         const placeNode = document.createElement('div');
         placeNode.className = 'schedule-place';
-        placeNode.textContent = place;
+        placeNode.textContent = game.venue || '구장 정보 없음';
         details.append(eventNode, placeNode);
         const statusNode = document.createElement('span');
-        statusNode.className = `schedule-state${status === '종료' ? ' past' : ''}`;
-        statusNode.textContent = status;
+        statusNode.className = `schedule-state${game.status === '경기 종료' ? ' past' : ''}`;
+        statusNode.textContent = game.status;
         row.append(dateNode, details, statusNode);
         return row;
       }));
@@ -590,11 +662,10 @@
         ['소속 팀', currentTeam.name],
         ['등번호', currentPlayer.number],
         ['포지션', currentPlayer.position],
-        ['생년월일', formatDate(currentPlayer.birth, { year: 'numeric', month: 'long', day: 'numeric' })],
-        ['나이', calculateAge(currentPlayer.birth)],
-        ['국적', currentPlayer.origin],
-        ['신장', currentPlayer.height],
-        ['프로 데뷔', currentPlayer.debut],
+        ['생년월일', currentPlayer.birth ? formatDate(currentPlayer.birth, { year: 'numeric', month: 'long', day: 'numeric' }) : '미공개'],
+        ['나이', currentPlayer.birth ? calculateAge(currentPlayer.birth) : '미공개'],
+        ['투타', currentPlayer.hand || '정보 없음'],
+        ['신장', currentPlayer.height || '정보 없음'],
       ];
       ui.profile.replaceChildren(...details.map(([label, value]) => {
         const row = document.createElement('div');
@@ -606,6 +677,19 @@
         row.append(key, data);
         return row;
       }));
+      if (currentPlayer.profileUrl) {
+        const row = document.createElement('div');
+        row.className = 'profile-row';
+        const key = document.createElement('span');
+        key.textContent = '공식 프로필';
+        const link = document.createElement('a');
+        link.href = currentPlayer.profileUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = 'KBO에서 보기';
+        row.append(key, link);
+        ui.profile.append(row);
+      }
     }
 
     async function addMoment(event) {
