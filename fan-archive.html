@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f3">
+  <title>MY PLAYER · 팬 아카이브</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f5f7f3;
+      --surface: #fff;
+      --ink: #1c2b31;
+      --muted: #66757a;
+      --line: #dce3df;
+      --teal: #12675f;
+      --teal-light: #d9eee8;
+      --coral: #e85d49;
+      --lime: #d5ec64;
+      --navy: #213b47;
+      --soft: #edf1ee;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--paper); font-family: "Avenir Next", "Apple SD Gothic Neo", sans-serif; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { width: min(100% - 40px, 1180px); margin: 0 auto; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; min-height: 76px; border-bottom: 1px solid var(--line); }
+    .wordmark { display: flex; align-items: center; gap: 11px; font-size: 13px; font-weight: 900; letter-spacing: 1.5px; }
+    .mark { display: grid; place-items: center; width: 34px; height: 34px; color: var(--navy); background: var(--lime); border-radius: 50%; font-family: Georgia, serif; font-size: 19px; }
+    .private-note { color: var(--muted); font-size: 11px; }
+    .page-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding: 27px 0 21px; }
+    .kicker { margin: 0 0 7px; color: var(--coral); font-size: 10px; font-weight: 900; letter-spacing: 1.7px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 0; font-family: Georgia, "Noto Serif KR", serif; font-size: 31px; line-height: 1.15; }
+    .selectors { display: flex; flex-wrap: wrap; gap: 9px; }
+    .selectors label { display: grid; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 800; }
+    select, input, textarea { color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 3px; }
+    select { min-width: 132px; min-height: 38px; padding: 0 29px 0 10px; }
+    .player-hero { display: grid; grid-template-columns: minmax(240px, 0.88fr) minmax(0, 1.25fr); min-height: 260px; overflow: hidden; background: var(--navy); color: #fff; }
+    .portrait { position: relative; display: grid; place-items: center; min-height: 260px; overflow: hidden; background: var(--teal); }
+    .portrait::before, .portrait::after { position: absolute; content: ""; border: 1px solid rgb(255 255 255 / 22%); transform: rotate(-35deg); }
+    .portrait::before { width: 310px; height: 310px; }
+    .portrait::after { width: 230px; height: 230px; }
+    .portrait-initials { position: relative; z-index: 1; display: grid; place-items: center; width: 142px; height: 142px; border: 1px solid rgb(255 255 255 / 55%); border-radius: 50%; color: var(--lime); background: rgb(15 56 58 / 32%); font-family: Georgia, serif; font-size: 43px; }
+    .portrait img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .portrait-tools { position: absolute; z-index: 2; right: 12px; bottom: 12px; display: flex; gap: 6px; }
+    .mini-action { min-height: 30px; padding: 0 9px; border: 1px solid rgb(255 255 255 / 52%); border-radius: 3px; color: #fff; background: rgb(20 44 49 / 72%); font-size: 10px; font-weight: 800; }
+    .mini-action:hover { background: var(--teal); }
+    .hero-info { display: flex; flex-direction: column; justify-content: space-between; padding: 25px 29px; }
+    .team-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; color: #c0d5d3; font-size: 11px; }
+    .fan-badge { display: inline-flex; align-items: center; min-height: 22px; margin-left: 4px; padding: 0 8px; border: 1px solid rgb(213 236 100 / 60%); border-radius: 20px; color: var(--lime); font-size: 9px; font-weight: 900; letter-spacing: 0.3px; }
+    .team-dot { width: 7px; height: 7px; background: var(--lime); border-radius: 50%; }
+    .player-name { margin: 0; font-family: Georgia, "Noto Serif KR", serif; font-size: 40px; line-height: 1; }
+    .player-name small { margin-left: 7px; color: #d5ec64; font-family: sans-serif; font-size: 13px; font-weight: 700; }
+    .player-bio { display: flex; flex-wrap: wrap; gap: 7px 18px; margin: 13px 0 20px; color: #d0dedc; font-size: 11px; }
+    .hero-bottom { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 15px; }
+    .connection { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 13px; }
+    .days-number { color: var(--lime); font-family: Georgia, serif; font-size: 43px; line-height: 0.95; font-variant-numeric: tabular-nums; }
+    .days-copy { color: #d2dfdc; font-size: 10px; line-height: 1.45; }
+    .days-copy strong { display: block; margin-bottom: 3px; color: #fff; font-size: 12px; }
+    .follow-date { width: 122px; min-height: 34px; padding: 0 8px; color: white; border-color: rgb(255 255 255 / 34%); background: rgb(255 255 255 / 8%); color-scheme: dark; font-size: 10px; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 20px; border-bottom: 1px solid var(--line); }
+    .tabs { display: flex; gap: 21px; overflow-x: auto; }
+    .tab { position: relative; min-height: 43px; padding: 0 1px; border: 0; color: var(--muted); background: transparent; font-size: 12px; font-weight: 800; white-space: nowrap; }
+    .tab[aria-selected="true"] { color: var(--teal); }
+    .tab[aria-selected="true"]::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 3px; background: var(--coral); content: ""; }
+    .toolbar-label { color: var(--muted); font-size: 10px; white-space: nowrap; }
+    .view { padding: 21px 0 35px; animation: reveal 240ms ease both; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .overview-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr); gap: 30px; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .section-heading h2 { margin: 0; font-family: Georgia, "Noto Serif KR", serif; font-size: 19px; }
+    .section-heading span { color: var(--muted); font-size: 10px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .stat { min-height: 96px; padding: 15px 13px; border-right: 1px solid var(--line); }
+    .stat:last-child { border-right: 0; }
+    .stat-label { display: block; margin-bottom: 13px; color: var(--muted); font-size: 10px; }
+    .stat-value { font-family: Georgia, serif; font-size: 26px; font-variant-numeric: tabular-nums; }
+    .stat-unit { margin-left: 3px; color: var(--muted); font-family: sans-serif; font-size: 10px; }
+    .schedule-list { border-top: 1px solid var(--line); }
+    .schedule-row { display: grid; grid-template-columns: 60px 1fr auto; align-items: center; gap: 11px; min-height: 56px; border-bottom: 1px solid var(--line); }
+    .schedule-date { color: var(--teal); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .schedule-event { font-size: 11px; font-weight: 800; }
+    .schedule-place { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .schedule-state { padding: 5px 7px; color: var(--teal); background: var(--teal-light); border-radius: 2px; font-size: 9px; font-weight: 900; }
+    .schedule-state.past { color: #69757a; background: #e8ece9; }
+    .fan-strip { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 25px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .fan-metric { display: flex; align-items: center; gap: 11px; min-height: 73px; padding: 11px 14px; border: 0; border-right: 1px solid var(--line); color: inherit; background: transparent; text-align: left; }
+    button.fan-metric { width: 100%; cursor: pointer; }
+    button.fan-metric:hover { background: #e9f1ed; }
+    .fan-metric:last-child { border: 0; }
+    .metric-symbol { display: grid; place-items: center; flex: 0 0 30px; height: 30px; border-radius: 50%; color: var(--teal); background: var(--lime); font-family: Georgia, serif; font-size: 15px; }
+    .fan-metric strong { display: block; font-family: Georgia, serif; font-size: 20px; font-variant-numeric: tabular-nums; }
+    .fan-metric span { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .section-note { margin: 10px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .memory-layout { display: grid; grid-template-columns: minmax(240px, 0.78fr) minmax(0, 1.22fr); gap: 35px; align-items: start; }
+    .memory-form { padding: 17px; background: var(--soft); }
+    .memory-form h2 { margin-bottom: 5px; font-family: Georgia, "Noto Serif KR", serif; font-size: 18px; }
+    .memory-form > p { margin-bottom: 15px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .field-label { display: grid; gap: 6px; margin-bottom: 11px; color: var(--muted); font-size: 10px; font-weight: 800; }
+    .field-label input, .field-label select, .field-label textarea { width: 100%; min-height: 37px; padding: 8px 9px; }
+    .field-label textarea { min-height: 92px; resize: vertical; line-height: 1.5; }
+    .file-input { padding: 8px !important; font-size: 10px; }
+    .primary-button { min-height: 39px; padding: 0 13px; border: 0; border-radius: 3px; color: #fff; background: var(--teal); font-size: 11px; font-weight: 900; }
+    .primary-button:hover { background: #0a514b; }
+    .timeline { position: relative; padding-left: 18px; border-left: 1px solid #b8c8c2; }
+    .moment { position: relative; padding: 0 0 20px 13px; }
+    .moment::before { position: absolute; top: 3px; left: -23px; width: 9px; height: 9px; border: 2px solid var(--paper); border-radius: 50%; background: var(--coral); content: ""; }
+    .moment-date { color: var(--teal); font-size: 10px; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .moment-type { margin-left: 7px; padding: 3px 6px; color: var(--muted); background: #e7ece8; font-size: 9px; }
+    .moment-text { margin: 8px 0; font-family: Georgia, "Noto Serif KR", serif; font-size: 14px; line-height: 1.55; white-space: pre-wrap; word-break: keep-all; }
+    .moment-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 7px; margin-top: 9px; }
+    .moment-photo { width: 100%; aspect-ratio: 1; object-fit: cover; cursor: zoom-in; }
+    .moment-delete { margin-top: 8px; padding: 0; border: 0; color: var(--muted); background: transparent; font-size: 9px; text-decoration: underline; }
+    .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; }
+    .gallery-item { position: relative; min-width: 0; padding: 0; overflow: hidden; border: 0; background: var(--soft); text-align: left; }
+    .gallery-item img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; transition: transform 180ms ease; }
+    .gallery-item:hover img { transform: scale(1.025); }
+    .gallery-caption { padding: 8px; }
+    .gallery-caption strong { display: block; overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+    .gallery-caption span { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
+    .empty-state { display: grid; place-items: center; min-height: 180px; padding: 24px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; text-align: center; line-height: 1.7; }
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 30px; border-top: 1px solid var(--line); }
+    .profile-row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; min-height: 47px; align-items: center; border-bottom: 1px solid var(--line); font-size: 11px; }
+    .profile-row span { color: var(--muted); }
+    .profile-row strong { font-size: 11px; }
+    .profile-note { max-width: 600px; margin-top: 16px; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    dialog { width: min(92vw, 900px); max-height: 90vh; padding: 0; overflow: auto; border: 0; background: transparent; }
+    dialog::backdrop { background: rgb(12 26 30 / 84%); }
+    .lightbox-image { display: block; max-width: 100%; max-height: 80vh; margin: auto; object-fit: contain; }
+    .lightbox-caption { margin: 8px 0 0; color: #fff; font-size: 11px; text-align: center; }
+    .lightbox-close { display: block; margin: 0 0 8px auto; min-height: 34px; padding: 0 10px; border: 1px solid rgb(255 255 255 / 45%); border-radius: 3px; color: white; background: transparent; font-size: 11px; }
+    .privacy { padding: 13px 0 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; line-height: 1.6; }
+    [hidden] { display: none !important; }
+
+    @media (max-width: 760px) {
+      .app { width: min(100% - 28px, 600px); }
+      .topbar { min-height: 61px; }
+      .page-heading { align-items: start; flex-direction: column; padding: 22px 0 16px; }
+      .selectors { width: 100%; display: grid; grid-template-columns: 0.8fr 1fr 1fr; }
+      .selectors label { min-width: 0; }
+      select { width: 100%; min-width: 0; }
+      .player-hero { grid-template-columns: 1fr; }
+      .portrait { min-height: 190px; }
+      .portrait-initials { width: 112px; height: 112px; font-size: 34px; }
+      .hero-info { min-height: 220px; padding: 21px; }
+      .player-name { font-size: 35px; }
+      .overview-grid, .memory-layout { grid-template-columns: 1fr; gap: 26px; }
+      .stat { padding: 13px 8px; }
+      .stat-value { font-size: 21px; }
+      .gallery { grid-template-columns: repeat(2, 1fr); gap: 9px; }
+      .profile-grid { grid-template-columns: 1fr; }
+      .toolbar-label { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="wordmark"><span class="mark">M</span><span>MY PLAYER / ARCHIVE</span></div>
+      <span class="private-note">나만 보는 응원 기록</span>
+    </header>
+
+    <main>
+      <div class="page-heading">
+        <div><p class="kicker">YOUR FAN STORY</p><h1>내가 지켜본 선수의 시간</h1></div>
+        <div class="selectors" aria-label="선수 선택">
+          <label for="sport-select">종목<select id="sport-select"></select></label>
+          <label for="team-select">팀<select id="team-select"></select></label>
+          <label for="player-select">선수<select id="player-select"></select></label>
+        </div>
+      </div>
+
+      <section class="player-hero" aria-label="선수와 나의 응원 기록">
+        <div class="portrait" id="portrait">
+          <span class="portrait-initials" id="portrait-initials">SH</span>
+          <div class="portrait-tools">
+            <button class="mini-action" id="portrait-upload-button" type="button">대표 사진 설정</button>
+            <input id="portrait-upload" type="file" accept="image/*" hidden>
+          </div>
+        </div>
+        <div class="hero-info">
+          <div>
+            <div class="team-line"><span class="team-dot"></span><span id="player-team"></span><span>·</span><span id="player-league"></span><span class="fan-badge" id="fan-badge"></span></div>
+            <h2 class="player-name"><span id="player-name"></span><small id="player-number"></small></h2>
+            <div class="player-bio"><span id="player-position"></span><span id="player-age"></span><span id="player-origin"></span></div>
+          </div>
+          <div class="hero-bottom">
+            <div class="connection">
+              <strong class="days-number" id="follow-days">0</strong>
+              <div class="days-copy"><strong>함께 응원한 날</strong><span id="follow-since-copy">첫 응원일을 기록해 보세요</span></div>
+            </div>
+            <label class="field-label" for="follow-date" style="margin:0;color:#d2dfdc">응원 시작일
+              <input class="follow-date" id="follow-date" type="date" aria-label="응원 시작일">
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <div class="toolbar">
+        <nav class="tabs" role="tablist" aria-label="선수 아카이브 메뉴">
+          <button class="tab" role="tab" id="tab-overview" aria-controls="view-overview" aria-selected="true" data-view="overview">오늘의 아카이브</button>
+          <button class="tab" role="tab" id="tab-story" aria-controls="view-story" aria-selected="false" data-view="story">나의 응원 연대기</button>
+          <button class="tab" role="tab" id="tab-photos" aria-controls="view-photos" aria-selected="false" data-view="photos">사진 보관함</button>
+          <button class="tab" role="tab" id="tab-profile" aria-controls="view-profile" aria-selected="false" data-view="profile">선수 정보</button>
+        </nav>
+        <span class="toolbar-label">팬의 기억이 쌓이는 개인 아카이브</span>
+      </div>
+
+      <section class="view" id="view-overview" role="tabpanel" aria-labelledby="tab-overview" data-panel="overview">
+        <div class="overview-grid">
+          <section aria-labelledby="stats-heading">
+            <div class="section-heading"><h2 id="stats-heading">이번 시즌 기록</h2><span id="stats-season">예시 데이터</span></div>
+            <div class="stat-grid" id="stat-grid"></div>
+          </section>
+          <section aria-labelledby="schedule-heading">
+            <div class="section-heading"><h2 id="schedule-heading">다가오는 일정</h2><span>일정 보기 →</span></div>
+            <div class="schedule-list" id="schedule-list"></div>
+          </section>
+        </div>
+        <div class="fan-strip" aria-label="나의 팬 기록 요약">
+          <div class="fan-metric"><span class="metric-symbol">記</span><div><strong id="moment-count">0</strong><span>내가 남긴 순간</span></div></div>
+          <button class="fan-metric" id="add-visit" type="button" title="직관 기록 추가"><span class="metric-symbol">+</span><div><strong id="visit-count">0</strong><span>직관 횟수 · 기록 추가</span></div></button>
+          <div class="fan-metric"><span class="metric-symbol">★</span><div><strong id="first-moment">아직</strong><span>첫 응원 기록</span></div></div>
+        </div>
+        <p class="section-note">기록과 일정은 기능 확인용 예시입니다. 내가 기억하는 순간과 사진을 더하면 나만의 팬 연대기가 완성됩니다.</p>
+      </section>
+
+      <section class="view" id="view-story" role="tabpanel" aria-labelledby="tab-story" data-panel="story" hidden>
+        <div class="memory-layout">
+          <form class="memory-form" id="moment-form">
+            <h2>오늘의 기억 남기기</h2>
+            <p>현장에서 본 장면, 중계로 함께한 순간, 그날의 기분을 적어두세요.</p>
+            <label class="field-label" for="moment-date">날짜<input id="moment-date" type="date" required></label>
+            <label class="field-label" for="moment-type">기록 종류
+              <select id="moment-type"><option>직관</option><option>경기 순간</option><option>응원 메모</option><option>기념일</option></select>
+            </label>
+            <label class="field-label" for="moment-text">나만의 메모<textarea id="moment-text" maxlength="600" placeholder="이 순간을 오래 기억하고 싶은 이유..." required></textarea></label>
+            <label class="field-label" for="moment-photos">사진 첨부<input class="file-input" id="moment-photos" type="file" accept="image/*" multiple></label>
+            <button class="primary-button" type="submit">내 연대기에 기록</button>
+          </form>
+          <section aria-labelledby="timeline-heading">
+            <div class="section-heading"><h2 id="timeline-heading">나의 응원 연대기</h2><span>시간순으로 보관</span></div>
+            <div class="timeline" id="timeline"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-photos" role="tabpanel" aria-labelledby="tab-photos" data-panel="photos" hidden>
+        <div class="section-heading"><h2>내가 모은 장면들</h2><span id="gallery-count">0장의 사진</span></div>
+        <div class="gallery" id="gallery"></div>
+      </section>
+
+      <section class="view" id="view-profile" role="tabpanel" aria-labelledby="tab-profile" data-panel="profile" hidden>
+        <div class="section-heading"><h2>선수 프로필</h2><span>공개 프로필 예시</span></div>
+        <div class="profile-grid" id="profile-grid"></div>
+        <p class="profile-note">주소·연락처 등 민감한 개인정보는 다루지 않습니다. 나이와 선수 소개는 공개 프로필을 전제로 한 예시이며, 실제 사용 시 데이터 제공처를 연결해야 합니다.</p>
+      </section>
+
+      <p class="privacy">사진, 응원 시작일, 방문 횟수, 메모는 이 브라우저의 IndexedDB에 저장되며 외부 서버로 전송되지 않습니다. 브라우저 데이터나 사이트 저장 공간을 삭제하면 함께 지워질 수 있습니다.</p>
+    </main>
+  </div>
+
+  <dialog id="lightbox">
+    <button class="lightbox-close" id="lightbox-close" type="button">닫기</button>
+    <img class="lightbox-image" id="lightbox-image" alt="기록한 사진">
+    <p class="lightbox-caption" id="lightbox-caption"></p>
+  </dialog>
+
+  <script>
+    const catalog = [
+      { id: 'baseball', name: '야구', league: 'KBO', teams: [
+        { id: 'lg', name: 'LG 트윈스', players: [
+          { id: 'lg-austin', name: '오스틴 딘', number: '#23', position: '내야수 · 1루수', birth: '1993-10-14', origin: '미국', height: '178 cm', debut: '2023년 KBO 데뷔', stats: [['타율', '.319'], ['홈런', '32'], ['타점', '132'], ['OPS', '.957']], schedule: [['10.28', 'vs 두산 베어스', '잠실야구장', '예정'], ['10.30', 'vs KT 위즈', '수원 KT위즈파크', '예정'], ['11.02', 'vs 삼성 라이온즈', '대구 삼성라이온즈파크', '예정']] },
+          { id: 'lg-hong', name: '홍창기', number: '#51', position: '외야수 · 우익수', birth: '1993-11-21', origin: '대한민국', height: '189 cm', debut: '2016년 KBO 데뷔', stats: [['타율', '.336'], ['안타', '176'], ['출루율', '.447'], ['도루', '10']], schedule: [['10.28', 'vs 두산 베어스', '잠실야구장', '예정'], ['10.30', 'vs KT 위즈', '수원 KT위즈파크', '예정'], ['11.02', 'vs 삼성 라이온즈', '대구 삼성라이온즈파크', '예정']] },
+        ] },
+        { id: 'kia', name: 'KIA 타이거즈', players: [
+          { id: 'kia-naseongbeom', name: '나성범', number: '#47', position: '외야수 · 우익수', birth: '1989-10-03', origin: '대한민국', height: '183 cm', debut: '2012년 KBO 데뷔', stats: [['타율', '.310'], ['홈런', '21'], ['타점', '80'], ['OPS', '.914']], schedule: [['10.27', 'vs SSG 랜더스', '광주-기아 챔피언스 필드', '예정'], ['10.29', 'vs 롯데 자이언츠', '사직야구장', '예정'], ['11.01', 'vs NC 다이노스', '창원NC파크', '예정']] },
+        ] },
+      ] },
+      { id: 'soccer', name: '축구', league: '해외축구', teams: [
+        { id: 'spurs', name: '토트넘 홋스퍼', players: [
+          { id: 'spurs-son', name: '손흥민', number: '#7', position: '공격수 · 윙어', birth: '1992-07-08', origin: '대한민국', height: '183 cm', debut: '프로 데뷔 2010년', stats: [['출전', '30'], ['득점', '17'], ['도움', '10'], ['슈팅 정확도', '48%']], schedule: [['10.28', 'vs 웨스트햄', '토트넘 홋스퍼 스타디움', '예정'], ['11.01', 'vs 맨체스터 시티', '에티하드 스타디움', '예정'], ['11.05', 'vs 아스널', '토트넘 홋스퍼 스타디움', '예정']] },
+        ] },
+        { id: 'psg', name: '파리 생제르맹', players: [
+          { id: 'psg-lee', name: '이강인', number: '#19', position: '미드필더 · 윙어', birth: '2001-02-19', origin: '대한민국', height: '174 cm', debut: '프로 데뷔 2018년', stats: [['출전', '26'], ['득점', '6'], ['도움', '5'], ['패스 성공률', '91%']], schedule: [['10.29', 'vs 릴', '파르크 데 프랭스', '예정'], ['11.02', 'vs 모나코', '스타드 루이 II', '예정'], ['11.06', 'vs 마르세유', '파르크 데 프랭스', '예정']] },
+        ] },
+      ] },
+      { id: 'basketball', name: '농구', league: 'NBA', teams: [
+        { id: 'warriors', name: '골든스테이트 워리어스', players: [
+          { id: 'gsw-curry', name: '스테픈 커리', number: '#30', position: '가드 · PG', birth: '1988-03-14', origin: '미국', height: '188 cm', debut: 'NBA 데뷔 2009년', stats: [['경기당 득점', '23.4'], ['리바운드', '4.5'], ['어시스트', '6.1'], ['3점 성공률', '40.8%']], schedule: [['10.27', 'vs LA 레이커스', '체이스 센터', '예정'], ['10.30', 'vs 피닉스 선즈', '풋프린트 센터', '예정'], ['11.03', 'vs 보스턴 셀틱스', '체이스 센터', '예정']] },
+        ] },
+        { id: 'lakers', name: 'LA 레이커스', players: [
+          { id: 'lal-lebron', name: '르브론 제임스', number: '#23', position: '포워드 · SF', birth: '1984-12-30', origin: '미국', height: '206 cm', debut: 'NBA 데뷔 2003년', stats: [['경기당 득점', '25.7'], ['리바운드', '7.3'], ['어시스트', '8.3'], ['야투 성공률', '54.0%']], schedule: [['10.27', 'vs 골든스테이트', '체이스 센터', '예정'], ['10.31', 'vs 새크라멘토 킹스', '크립토닷컴 아레나', '예정'], ['11.04', 'vs 마이애미 히트', '카세야 센터', '예정']] },
+        ] },
+      ] },
+    ];
+
+    const ui = {
+      sport: document.querySelector('#sport-select'), team: document.querySelector('#team-select'), player: document.querySelector('#player-select'),
+      name: document.querySelector('#player-name'), number: document.querySelector('#player-number'), teamName: document.querySelector('#player-team'),
+      league: document.querySelector('#player-league'), position: document.querySelector('#player-position'), age: document.querySelector('#player-age'),
+      fanBadge: document.querySelector('#fan-badge'),
+      origin: document.querySelector('#player-origin'), initials: document.querySelector('#portrait-initials'), portrait: document.querySelector('#portrait'),
+      followDate: document.querySelector('#follow-date'), followDays: document.querySelector('#follow-days'), followSince: document.querySelector('#follow-since-copy'),
+      stats: document.querySelector('#stat-grid'), schedule: document.querySelector('#schedule-list'), visits: document.querySelector('#visit-count'),
+      momentCount: document.querySelector('#moment-count'), firstMoment: document.querySelector('#first-moment'), timeline: document.querySelector('#timeline'),
+      gallery: document.querySelector('#gallery'), galleryCount: document.querySelector('#gallery-count'), profile: document.querySelector('#profile-grid'),
+      addVisit: document.querySelector('#add-visit'),
+      form: document.querySelector('#moment-form'), date: document.querySelector('#moment-date'), type: document.querySelector('#moment-type'), text: document.querySelector('#moment-text'),
+      photos: document.querySelector('#moment-photos'), tabs: [...document.querySelectorAll('[data-view]')], panels: [...document.querySelectorAll('[data-panel]')],
+      portraitUpload: document.querySelector('#portrait-upload'), portraitUploadButton: document.querySelector('#portrait-upload-button'),
+      lightbox: document.querySelector('#lightbox'), lightboxImage: document.querySelector('#lightbox-image'), lightboxCaption: document.querySelector('#lightbox-caption'),
+    };
+    const DB_NAME = 'my-player-fan-archive';
+    const STORE_NAME = 'records';
+    let dbPromise;
+    let currentPlayer;
+    let currentTeam;
+    let currentSport;
+    let record;
+    let imageUrls = [];
+
+    function openDatabase() {
+      if (dbPromise) return dbPromise;
+      dbPromise = new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME, { keyPath: 'playerId' });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      return dbPromise;
+    }
+
+    async function readRecord(playerId) {
+      const db = await openDatabase();
+      return new Promise((resolve, reject) => {
+        const request = db.transaction(STORE_NAME).objectStore(STORE_NAME).get(playerId);
+        request.onsuccess = () => resolve(request.result ?? { playerId, followDate: '', visits: 0, moments: [], portrait: null });
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function saveRecord() {
+      const db = await openDatabase();
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(STORE_NAME, 'readwrite');
+        transaction.objectStore(STORE_NAME).put(record);
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error);
+      });
+    }
+
+    function calculateAge(birthDate) {
+      const birth = new Date(`${birthDate}T00:00:00`);
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age -= 1;
+      return `${age}세`;
+    }
+
+    function formatDate(value, options = { month: 'long', day: 'numeric' }) {
+      if (!value) return '날짜 미기록';
+      return new Intl.DateTimeFormat('ko-KR', options).format(new Date(`${value}T00:00:00`));
+    }
+
+    function initials(name) { return name.replace(/\s+/g, '').slice(0, 2); }
+
+    function setOptions(select, items, selectedId) {
+      select.replaceChildren(...items.map((item) => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.name;
+        return option;
+      }));
+      select.value = selectedId ?? items[0]?.id ?? '';
+    }
+
+    function populateTeams() {
+      currentSport = catalog.find((sport) => sport.id === ui.sport.value) ?? catalog[0];
+      setOptions(ui.team, currentSport.teams, currentSport.teams[0].id);
+      populatePlayers();
+    }
+
+    function populatePlayers() {
+      currentTeam = currentSport.teams.find((team) => team.id === ui.team.value) ?? currentSport.teams[0];
+      setOptions(ui.player, currentTeam.players, currentTeam.players[0].id);
+      selectPlayer();
+    }
+
+    async function selectPlayer() {
+      currentPlayer = currentTeam.players.find((player) => player.id === ui.player.value) ?? currentTeam.players[0];
+      record = await readRecord(currentPlayer.id);
+      renderPlayer();
+    }
+
+    function clearImageUrls() {
+      imageUrls.forEach((url) => URL.revokeObjectURL(url));
+      imageUrls = [];
+    }
+
+    function imageUrl(blob) {
+      if (!blob) return '';
+      const url = URL.createObjectURL(blob);
+      imageUrls.push(url);
+      return url;
+    }
+
+    function renderPlayer() {
+      clearImageUrls();
+      ui.name.textContent = currentPlayer.name;
+      ui.number.textContent = currentPlayer.number;
+      ui.teamName.textContent = currentTeam.name;
+      ui.league.textContent = currentSport.league;
+      ui.position.textContent = currentPlayer.position;
+      ui.age.textContent = calculateAge(currentPlayer.birth);
+      ui.origin.textContent = currentPlayer.origin;
+      ui.initials.textContent = initials(currentPlayer.name);
+      ui.followDate.value = record.followDate || '';
+      ui.date.value = new Date().toISOString().slice(0, 10);
+      renderPortrait();
+      renderConnection();
+      renderStats();
+      renderSchedule();
+      renderFanSummary();
+      renderTimeline();
+      renderGallery();
+      renderProfile();
+    }
+
+    function renderPortrait() {
+      const oldImage = ui.portrait.querySelector('img');
+      if (oldImage) oldImage.remove();
+      if (!record.portrait) return;
+      const image = document.createElement('img');
+      image.src = imageUrl(record.portrait);
+      image.alt = `${currentPlayer.name} 대표 사진`;
+      ui.portrait.prepend(image);
+    }
+
+    function renderConnection() {
+      ui.fanBadge.textContent = getFanBadge();
+      if (!record.followDate) {
+        ui.followDays.textContent = '0';
+        ui.followSince.textContent = '첫 응원일을 기록해 보세요';
+        return;
+      }
+      const start = new Date(`${record.followDate}T00:00:00`);
+      const days = Math.max(1, Math.floor((new Date().setHours(0, 0, 0, 0) - start.getTime()) / 86400000) + 1);
+      ui.followDays.textContent = String(days);
+      ui.followSince.textContent = `${formatDate(record.followDate, { year: 'numeric', month: 'long', day: 'numeric' })}부터 응원 중`;
+    }
+
+    function getFanBadge() {
+      const moments = record.moments.length;
+      if (record.followDate) {
+        const start = new Date(`${record.followDate}T00:00:00`);
+        const days = Math.max(1, Math.floor((new Date().setHours(0, 0, 0, 0) - start.getTime()) / 86400000) + 1);
+        if (days >= 365 || moments >= 30) return '오래 함께한 팬';
+        if (days >= 100 || moments >= 10 || record.visits >= 5) return '꾸준히 지켜본 팬';
+        return '응원 여정의 시작';
+      }
+      if (moments >= 10 || record.visits >= 5) return '기록으로 함께한 팬';
+      return moments || record.visits ? '응원 여정의 시작' : '첫 장을 기다리는 중';
+    }
+
+    function renderStats() {
+      ui.stats.replaceChildren(...currentPlayer.stats.map(([label, value]) => {
+        const item = document.createElement('div');
+        item.className = 'stat';
+        const title = document.createElement('span');
+        title.className = 'stat-label';
+        title.textContent = label;
+        const result = document.createElement('strong');
+        result.className = 'stat-value';
+        result.textContent = value;
+        item.append(title, result);
+        return item;
+      }));
+    }
+
+    function renderSchedule() {
+      ui.schedule.replaceChildren(...currentPlayer.schedule.map(([date, event, place, status]) => {
+        const row = document.createElement('div');
+        row.className = 'schedule-row';
+        const dateNode = document.createElement('span');
+        dateNode.className = 'schedule-date';
+        dateNode.textContent = date;
+        const details = document.createElement('div');
+        const eventNode = document.createElement('div');
+        eventNode.className = 'schedule-event';
+        eventNode.textContent = event;
+        const placeNode = document.createElement('div');
+        placeNode.className = 'schedule-place';
+        placeNode.textContent = place;
+        details.append(eventNode, placeNode);
+        const statusNode = document.createElement('span');
+        statusNode.className = `schedule-state${status === '종료' ? ' past' : ''}`;
+        statusNode.textContent = status;
+        row.append(dateNode, details, statusNode);
+        return row;
+      }));
+    }
+
+    function renderFanSummary() {
+      ui.visits.textContent = String(record.visits);
+      ui.momentCount.textContent = String(record.moments.length);
+      const first = [...record.moments].sort((a, b) => a.date.localeCompare(b.date))[0];
+      ui.firstMoment.textContent = first ? formatDate(first.date) : '아직';
+    }
+
+    function renderTimeline() {
+      const moments = [...record.moments].sort((a, b) => b.date.localeCompare(a.date));
+      if (!moments.length) {
+        ui.timeline.innerHTML = '<div class="empty-state">아직 기록한 순간이 없습니다.<br>당신이 기억하는 첫 장면을 남겨보세요.</div>';
+        return;
+      }
+      ui.timeline.replaceChildren(...moments.map((moment) => {
+        const item = document.createElement('article');
+        item.className = 'moment';
+        const meta = document.createElement('div');
+        const date = document.createElement('span');
+        date.className = 'moment-date';
+        date.textContent = formatDate(moment.date, { year: 'numeric', month: 'short', day: 'numeric' });
+        const type = document.createElement('span');
+        type.className = 'moment-type';
+        type.textContent = moment.type;
+        meta.append(date, type);
+        const text = document.createElement('p');
+        text.className = 'moment-text';
+        text.textContent = moment.text;
+        item.append(meta, text);
+        if (moment.photos?.length) {
+          const photos = document.createElement('div');
+          photos.className = 'moment-photos';
+          moment.photos.forEach((blob, index) => {
+            const image = document.createElement('img');
+            image.className = 'moment-photo';
+            image.src = imageUrl(blob);
+            image.alt = `${currentPlayer.name}의 기록 사진 ${index + 1}`;
+            image.addEventListener('click', () => showLightbox(image.src, `${formatDate(moment.date)} · ${moment.type}`));
+            photos.append(image);
+          });
+          item.append(photos);
+        }
+        const remove = document.createElement('button');
+        remove.className = 'moment-delete';
+        remove.type = 'button';
+        remove.textContent = '이 기록 삭제';
+        remove.addEventListener('click', () => deleteMoment(moment.id));
+        item.append(remove);
+        return item;
+      }));
+    }
+
+    function renderGallery() {
+      const photos = record.moments.flatMap((moment) => (moment.photos ?? []).map((blob) => ({ blob, moment })));
+      ui.galleryCount.textContent = `${photos.length}장의 사진`;
+      if (!photos.length) {
+        ui.gallery.innerHTML = '<div class="empty-state" style="grid-column:1/-1">아직 사진이 없습니다.<br>나만 간직하고 싶은 장면을 연대기에 추가해 보세요.</div>';
+        return;
+      }
+      ui.gallery.replaceChildren(...photos.map(({ blob, moment }, index) => {
+        const button = document.createElement('button');
+        button.className = 'gallery-item';
+        button.type = 'button';
+        const image = document.createElement('img');
+        image.src = imageUrl(blob);
+        image.alt = `${currentPlayer.name} 사진 ${index + 1}`;
+        const caption = document.createElement('span');
+        caption.className = 'gallery-caption';
+        const title = document.createElement('strong');
+        title.textContent = moment.text;
+        const date = document.createElement('span');
+        date.textContent = `${formatDate(moment.date)} · ${moment.type}`;
+        caption.append(title, date);
+        button.append(image, caption);
+        button.addEventListener('click', () => showLightbox(image.src, `${formatDate(moment.date)} · ${moment.type}`));
+        return button;
+      }));
+    }
+
+    function renderProfile() {
+      const details = [
+        ['종목 / 리그', `${currentSport.name} · ${currentSport.league}`],
+        ['소속 팀', currentTeam.name],
+        ['등번호', currentPlayer.number],
+        ['포지션', currentPlayer.position],
+        ['생년월일', formatDate(currentPlayer.birth, { year: 'numeric', month: 'long', day: 'numeric' })],
+        ['나이', calculateAge(currentPlayer.birth)],
+        ['국적', currentPlayer.origin],
+        ['신장', currentPlayer.height],
+        ['프로 데뷔', currentPlayer.debut],
+      ];
+      ui.profile.replaceChildren(...details.map(([label, value]) => {
+        const row = document.createElement('div');
+        row.className = 'profile-row';
+        const key = document.createElement('span');
+        key.textContent = label;
+        const data = document.createElement('strong');
+        data.textContent = value;
+        row.append(key, data);
+        return row;
+      }));
+    }
+
+    async function addMoment(event) {
+      event.preventDefault();
+      const files = [...ui.photos.files].filter((file) => file.type.startsWith('image/'));
+      const photos = await Promise.all(files.map((file) => file.slice(0, file.size, file.type)));
+      record.moments.push({ id: crypto.randomUUID(), date: ui.date.value, type: ui.type.value, text: ui.text.value.trim(), photos });
+      await saveRecord();
+      ui.form.reset();
+      ui.date.value = new Date().toISOString().slice(0, 10);
+      renderPlayer();
+      switchView('story');
+    }
+
+    async function deleteMoment(momentId) {
+      record.moments = record.moments.filter((moment) => moment.id !== momentId);
+      await saveRecord();
+      renderPlayer();
+      switchView('story');
+    }
+
+    async function setPortrait(file) {
+      if (!file?.type.startsWith('image/')) return;
+      record.portrait = file.slice(0, file.size, file.type);
+      await saveRecord();
+      renderPortrait();
+    }
+
+    async function updateFollowDate() {
+      record.followDate = ui.followDate.value;
+      await saveRecord();
+      renderConnection();
+    }
+
+    async function addVisit() {
+      record.visits += 1;
+      record.moments.push({ id: crypto.randomUUID(), date: new Date().toISOString().slice(0, 10), type: '직관', text: '오늘 경기를 직접 보고 응원했다.', photos: [] });
+      await saveRecord();
+      renderPlayer();
+    }
+
+    function showLightbox(src, caption) {
+      ui.lightboxImage.src = src;
+      ui.lightboxCaption.textContent = caption;
+      ui.lightbox.showModal();
+    }
+
+    function switchView(view) {
+      ui.tabs.forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.view === view)));
+      ui.panels.forEach((panel) => { panel.hidden = panel.dataset.panel !== view; });
+    }
+
+    function init() {
+      setOptions(ui.sport, catalog, catalog[0].id);
+      ui.sport.addEventListener('change', populateTeams);
+      ui.team.addEventListener('change', populatePlayers);
+      ui.player.addEventListener('change', selectPlayer);
+      ui.form.addEventListener('submit', addMoment);
+      ui.followDate.addEventListener('change', updateFollowDate);
+      ui.portraitUploadButton.addEventListener('click', () => ui.portraitUpload.click());
+      ui.portraitUpload.addEventListener('change', () => setPortrait(ui.portraitUpload.files[0]));
+      document.querySelector('#lightbox-close').addEventListener('click', () => ui.lightbox.close());
+      ui.lightbox.addEventListener('click', (event) => { if (event.target === ui.lightbox) ui.lightbox.close(); });
+      ui.tabs.forEach((tab) => tab.addEventListener('click', () => switchView(tab.dataset.view)));
+      ui.addVisit.addEventListener('click', addVisit);
+      populateTeams();
+      switchView('overview');
+    }
+
+    init();
+  </script>
+</body>
+</html>
