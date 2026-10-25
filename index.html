@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f4f0e6">
   <title>끝내기까지 한 타석</title>
+  <script>
+    if (!new URLSearchParams(window.location.search).has('game')) {
+      window.location.replace(new URL('fan-archive.html', window.location.href).href);
+    }
+  </script>
   <style>
     :root {
       color-scheme: light;
