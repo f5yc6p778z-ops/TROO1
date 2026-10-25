@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f0e6">
+  <title>끝내기까지 한 타석</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4f0e6;
+      --ink: #17271f;
+      --muted: #69766d;
+      --green: #245b43;
+      --green-dark: #173c2e;
+      --red: #d94f3d;
+      --line: #d7d9cb;
+      --white: #fffdf7;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(#c9cabc 0.65px, transparent 0.65px);
+      background-size: 13px 13px;
+      font-family: "Trebuchet MS", "Apple SD Gothic Neo", sans-serif;
+    }
+
+    button, input { font: inherit; }
+
+    .page {
+      width: min(100% - 36px, 980px);
+      min-height: 100vh;
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 26px 0 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      color: white;
+      background: var(--red);
+      font-size: 16px;
+    }
+
+    .edition {
+      color: var(--muted);
+      font-family: Georgia, serif;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.85fr);
+      align-items: center;
+      gap: clamp(28px, 6vw, 76px);
+      padding: 42px 0;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Noto Serif KR", serif;
+      font-size: clamp(38px, 6vw, 66px);
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1.08;
+    }
+
+    .intro {
+      max-width: 420px;
+      margin: 16px 0 26px;
+      color: var(--muted);
+      line-height: 1.7;
+      word-break: keep-all;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      max-width: 420px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: rgb(255 253 247 / 75%);
+    }
+
+    .score {
+      padding: 15px 18px;
+    }
+
+    .score + .score { border-left: 1px solid var(--line); }
+
+    .score-label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .score strong {
+      font-family: Georgia, serif;
+      font-size: 26px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .score strong small {
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .game-panel {
+      overflow: hidden;
+      border: 1px solid #244936;
+      border-radius: 6px;
+      color: #fffdf7;
+      background: var(--green-dark);
+      box-shadow: 8px 8px 0 #d8d8ca;
+    }
+
+    .panel-top {
+      display: flex;
+      justify-content: space-between;
+      padding: 17px 20px;
+      border-bottom: 1px solid rgb(255 255 255 / 15%);
+      color: #cbd9ca;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+    }
+
+    .inning { color: #f4cf71; }
+
+    .field {
+      position: relative;
+      display: grid;
+      place-items: center;
+      height: 190px;
+      overflow: hidden;
+      background: repeating-linear-gradient(120deg, #2d704f 0 34px, #286647 34px 68px);
+    }
+
+    .diamond {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      transform: rotate(45deg);
+      border: 2px solid rgb(255 255 255 / 75%);
+      background: #bd8050;
+    }
+
+    .base {
+      position: absolute;
+      z-index: 1;
+      width: 13px;
+      aspect-ratio: 1;
+      border: 1px solid #fffdf7;
+      background: #fffdf7;
+      transform: rotate(-45deg);
+    }
+
+    .base.home { bottom: -7px; left: calc(50% - 7px); }
+    .base.first { top: calc(50% - 7px); right: -7px; }
+    .base.second { top: -7px; left: calc(50% - 7px); }
+    .base.third { top: calc(50% - 7px); left: -7px; }
+
+    .pitcher {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 22px;
+      aspect-ratio: 1;
+      border: 2px solid #fffdf7;
+      border-radius: 50%;
+      background: #d94f3d;
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+
+    .field-label {
+      position: absolute;
+      right: 17px;
+      bottom: 14px;
+      color: rgb(255 255 255 / 70%);
+      font-family: Georgia, serif;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    .play-area { padding: 20px; }
+
+    .play-area label {
+      display: block;
+      margin-bottom: 9px;
+      color: #d9e2d9;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .guess-row { display: flex; gap: 9px; }
+
+    #guess {
+      width: 100%;
+      min-width: 0;
+      height: 48px;
+      padding: 0 14px;
+      border: 1px solid #66836f;
+      border-radius: 3px;
+      outline: 0;
+      color: var(--ink);
+      background: var(--white);
+      font-family: Georgia, serif;
+      font-size: 22px;
+      letter-spacing: 8px;
+      text-align: center;
+      transition: border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    #guess:focus { border-color: #f4cf71; box-shadow: 0 0 0 3px rgb(244 207 113 / 20%); }
+
+    #guess::placeholder {
+      color: #a4aca4;
+      letter-spacing: 6px;
+    }
+
+    .swing {
+      display: grid;
+      flex: 0 0 52px;
+      place-items: center;
+      border: 0;
+      border-radius: 3px;
+      color: white;
+      background: var(--red);
+      cursor: pointer;
+      font-size: 21px;
+      transition: background 140ms ease, transform 140ms ease;
+    }
+
+    .swing:hover { background: #ed624e; transform: translateY(-1px); }
+    .swing:focus-visible, .reset:focus-visible { outline: 3px solid #f4cf71; outline-offset: 3px; }
+
+    .message {
+      min-height: 20px;
+      margin: 10px 0 0;
+      color: #f4cf71;
+      font-size: 12px;
+    }
+
+    .history {
+      max-height: 190px;
+      overflow-y: auto;
+      border-top: 1px solid rgb(255 255 255 / 15%);
+    }
+
+    .history-head, .history-row {
+      display: grid;
+      grid-template-columns: 0.7fr 1.3fr 1fr;
+      align-items: center;
+      padding: 10px 20px;
+    }
+
+    .history-head {
+      color: #a9bcae;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .history-row {
+      border-top: 1px solid rgb(255 255 255 / 9%);
+      font-family: Georgia, serif;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .history-row .result { color: #f4cf71; }
+    .empty-history { padding: 8px 20px 18px; color: #a9bcae; font-size: 12px; }
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 17px 0 22px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .reset {
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      color: var(--ink);
+      background: var(--paper);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .reset:hover { background: var(--white); }
+
+    @media (max-width: 680px) {
+      .page { width: min(100% - 28px, 470px); }
+      header { padding: 18px 0 15px; }
+      main { grid-template-columns: 1fr; gap: 28px; padding: 30px 0; }
+      .intro { margin: 12px 0 20px; }
+      .scoreboard { max-width: none; }
+      .game-panel { box-shadow: 5px 5px 0 #d8d8ca; }
+      .field { height: 165px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+    }
+
+    .scoreboard { grid-template-columns: 1.15fr 1fr 0.7fr; max-width: none; }
+    .score { min-width: 0; padding: 13px 12px; }
+    .score strong { white-space: nowrap; font-size: 23px; }
+    .score-label { letter-spacing: 0.5px; }
+    .intro { margin-bottom: 20px; }
+    .field { height: 160px; }
+    .base.occupied { border-color: #f4cf71; background: #f4cf71; box-shadow: 0 0 0 3px rgb(23 60 46 / 55%); }
+    .game-panel { background: #173c2e; }
+    .panel-top { align-items: center; }
+    .panel-top .inning { white-space: nowrap; }
+    .play-area { padding: 18px 20px 15px; }
+    .scene-label { margin: 0 0 8px; color: #f4cf71; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; }
+    .narrative { min-height: 58px; margin: 0 0 13px; color: #fffdf7; font-family: Georgia, "Noto Serif KR", serif; font-size: 16px; line-height: 1.6; word-break: keep-all; }
+    .directive { display: grid; gap: 4px; margin-bottom: 12px; padding: 9px 11px; border-left: 2px solid #f4cf71; background: rgb(255 255 255 / 7%); }
+    .directive span { color: #b8c9bc; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; }
+    .directive strong { color: #fffdf7; font-size: 12px; line-height: 1.45; }
+    .choices { display: grid; gap: 8px; }
+    .choice {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 54px;
+      padding: 9px 11px;
+      border: 1px solid #66836f;
+      border-radius: 3px;
+      color: #fffdf7;
+      background: #214b37;
+      cursor: pointer;
+      text-align: left;
+      transition: background 140ms ease, border-color 140ms ease;
+    }
+    .choice:hover { border-color: #f4cf71; background: #2b5a41; }
+    .choice:focus-visible { outline: 3px solid #f4cf71; outline-offset: 2px; }
+    .choice-mark { display: grid; place-items: center; width: 26px; aspect-ratio: 1; border: 1px solid #78917d; border-radius: 50%; color: #f4cf71; font-family: Georgia, serif; }
+    .choice-title { display: block; font-size: 12px; font-weight: 800; }
+    .choice-detail { display: block; margin-top: 3px; color: #c4d2c6; font-size: 11px; line-height: 1.35; }
+    .choice-arrow { color: #f4cf71; font-size: 17px; }
+    .message { margin-top: 10px; color: #f4cf71; line-height: 1.5; }
+    .history { max-height: 124px; }
+    .history-head { grid-template-columns: 0.7fr 1.3fr; padding-top: 8px; padding-bottom: 7px; }
+    .history-head span:last-child { text-align: right; }
+    .history-row { grid-template-columns: 0.7fr 1.3fr; gap: 8px; padding: 8px 20px; font-family: inherit; font-size: 11px; line-height: 1.45; }
+    .history-row .result { color: #cbd9ca; text-align: right; }
+    .empty-history { padding-top: 4px; }
+    .reset { display: inline-flex; align-items: center; gap: 7px; }
+
+    @media (max-width: 680px) {
+      .scoreboard { grid-template-columns: 1.15fr 1fr 0.7fr; }
+      .score { padding: 12px 9px; }
+      .score strong { font-size: 20px; }
+      .field { height: 145px; }
+      .game-panel { box-shadow: 5px 5px 0 #d8d8ca; }
+    }
+
+    .pitcher-report { margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--line); }
+    .pitcher-summary { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+    .pitcher-summary span { display: block; margin-bottom: 5px; color: var(--muted); font-size: 10px; font-weight: 700; }
+    .pitcher-summary strong { font-family: Georgia, serif; font-size: 15px; }
+    .pitch-count strong { font-size: 19px; font-variant-numeric: tabular-nums; }
+    .pitcher-summary small { color: var(--muted); font-family: inherit; font-size: 11px; }
+    .repertoire-title { margin: 15px 0 8px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: 0.5px; }
+    .pitch-types { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+    .pitch-type { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; font-size: 11px; }
+    .pitch-type strong { font-variant-numeric: tabular-nums; }
+    .pitch-meter { grid-column: 1 / -1; height: 4px; overflow: hidden; background: #dedfd5; }
+    .pitch-meter span { display: block; height: 100%; background: var(--green); }
+    .batter-report { margin-top: 16px; padding-top: 13px; border-top: 1px solid var(--line); }
+    .batter-heading { margin: 0 0 9px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: 0.5px; }
+    .batter-stats { display: grid; grid-template-columns: 1fr 1.2fr 0.8fr; gap: 8px; }
+    .batter-stat span { display: block; margin-bottom: 4px; color: var(--muted); font-size: 10px; }
+    .batter-stat strong { font-family: Georgia, serif; font-size: 18px; font-variant-numeric: tabular-nums; }
+    .pitch-scene { height: 236px; background: repeating-linear-gradient(110deg, #2d704f 0 38px, #286647 38px 76px); }
+    .pitcher-spot { position: absolute; top: 12px; left: 50%; color: rgb(255 255 255 / 75%); font-size: 9px; font-weight: 800; letter-spacing: 1px; transform: translateX(-50%); }
+    .strike-zone {
+      position: absolute;
+      top: 52%;
+      left: 50%;
+      display: grid;
+      width: 132px;
+      height: 142px;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      border: 2px solid #fffdf7;
+      background: rgb(23 60 46 / 24%);
+      transform: translate(-50%, -50%);
+    }
+    .zone-cell { border-right: 1px solid rgb(255 253 247 / 56%); border-bottom: 1px solid rgb(255 253 247 / 56%); }
+    .zone-cell:nth-child(3n) { border-right: 0; }
+    .zone-cell:nth-last-child(-n + 3) { border-bottom: 0; }
+    .zone-label { position: absolute; top: calc(52% + 77px); left: 50%; color: #fffdf7; font-size: 9px; font-weight: 800; letter-spacing: 1.4px; transform: translateX(-50%); white-space: nowrap; }
+    .pitch-ball {
+      position: absolute;
+      z-index: 2;
+      top: 8%;
+      left: 50%;
+      width: 17px;
+      aspect-ratio: 1;
+      border: 1px solid #b33c2e;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff 0 10%, #f1e5d3 12% 70%, #d6c1a6 100%);
+      box-shadow: 0 2px 5px rgb(0 0 0 / 40%);
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.38);
+    }
+    .pitch-ball.in-flight { opacity: 1; animation: pitch-approach 850ms cubic-bezier(0.2, 0.62, 0.3, 1) forwards; }
+    @keyframes pitch-approach {
+      from { top: 8%; left: 50%; transform: translate(-50%, -50%) scale(0.38); }
+      to { top: var(--landing-y); left: var(--landing-x); transform: translate(-50%, -50%) scale(1); }
+    }
+    .pitch-call { right: 0; bottom: 12px; left: 0; color: #fffdf7; font-family: inherit; font-size: 11px; font-weight: 800; text-align: center; letter-spacing: 1px; }
+    .pitch-call[data-call="strike"] { color: #f4cf71; }
+    .pitch-call[data-call="ball"] { color: #fffdf7; }
+    .club-setup { display: grid; gap: 13px; margin-top: 22px; }
+    .club-setup label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 700; }
+    .club-setup select { width: 100%; min-height: 42px; padding: 0 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: var(--white); }
+    .selected-batter { min-height: 18px; margin: -3px 0 0; color: var(--green); font-size: 12px; font-weight: 700; }
+    .start-game, .change-lineup {
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid var(--green-dark);
+      border-radius: 3px;
+      color: white;
+      background: var(--green);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .start-game:hover, .change-lineup:hover { background: var(--green-dark); }
+    .roster-note { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; word-break: keep-all; }
+    .inning-label { display: inline-block; margin-left: 5px; color: var(--muted); font-family: inherit; font-size: 11px; }
+    .choices { grid-template-columns: 1fr 1fr; }
+    .choice.wait { grid-column: 1 / -1; }
+    @media (max-width: 680px) {
+      .pitcher-report { margin-top: 15px; }
+      .pitch-scene { height: 218px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .pitch-ball.in-flight { animation-duration: 1ms; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="brand"><span class="brand-mark" aria-hidden="true">B</span><span>BASEBALL CLUB</span></div>
+      <span class="edition">SINGLE PLAYER · 001</span>
+    </header>
+
+    <main>
+      <section aria-labelledby="title">
+        <p class="eyebrow">9회말 · 2아웃 · 만루</p>
+        <h1 id="title">끝내기까지<br>한 타석</h1>
+        <p class="intro">동점으로 맞은 마지막 공격. 감독의 사인을 따를지, 타석에서 직접 판단할지 선택하세요. 당신의 한 번의 선택이 경기의 결말을 바꿉니다.</p>
+        <section class="club-setup" id="club-setup" aria-label="경기 선수 선택">
+          <label for="batter-team-select">타자 구단
+            <select id="batter-team-select"></select>
+          </label>
+          <p class="selected-batter" id="selected-batter"></p>
+          <label for="pitcher-select">상대 마무리 투수
+            <select id="pitcher-select"></select>
+          </label>
+          <button class="start-game" id="start-game" type="button">이 선수로 경기 시작</button>
+          <p class="roster-note">선수 구성과 보직·구종 수치는 게임용 설정이며 실제 시즌 엔트리와 기록을 반영한 실시간 정보는 아닙니다.</p>
+        </section>
+        <div class="scoreboard" id="scoreboard" aria-label="게임 현황" hidden>
+          <div class="score"><span class="score-label">점수</span><strong id="scoreline">4 <small>-</small> 4</strong></div>
+          <div class="score"><span class="score-label">볼 · 스트라이크</span><strong id="count">0<small>-</small>0</strong></div>
+          <div class="score"><span class="score-label">아웃</span><strong id="outs">2<small>/3</small></strong></div>
+        </div>
+        <section class="pitcher-report" id="pitcher-report" aria-label="상대 투수 정보" hidden>
+          <div class="pitcher-summary">
+            <div><span>상대 마무리</span><strong id="pitcher-name"></strong></div>
+            <div class="pitch-count"><span>투구 수</span><strong id="pitch-count">18구</strong></div>
+          </div>
+          <p class="repertoire-title">구종별 구사율 · 평균 구속</p>
+          <div class="pitch-types" id="pitch-types"></div>
+        </section>
+        <section class="batter-report" id="batter-report" aria-label="누적 타자 기록" hidden>
+          <p class="batter-heading">누적 타자 기록</p>
+          <div class="batter-stats">
+            <div class="batter-stat"><span>타자</span><strong id="batter-name"></strong></div>
+            <div class="batter-stat"><span>타율</span><strong id="batter-average">.000</strong></div>
+            <div class="batter-stat"><span>안타 / 타수</span><strong id="batter-hit-at-bats">0 / 0</strong></div>
+          </div>
+          <p class="batter-heading">타석 <strong id="batter-plate-appearances">0</strong></p>
+        </section>
+      </section>
+
+      <section class="game-panel" id="game-panel" aria-label="끝내기 타석" hidden>
+        <div class="panel-top"><span><span id="away-team-label">AWAY</span> 4 &nbsp; : &nbsp; 4 <span id="home-team-label">HOME</span></span><span class="inning">9회말 · 2아웃</span></div>
+        <div class="field pitch-scene" id="pitch-scene" role="img" aria-label="ABS 스트라이크존과 투구 궤적">
+          <span class="pitcher-spot">PITCHER</span>
+          <div class="strike-zone" aria-label="3 곱하기 3 스트라이크존">
+            <span class="zone-cell"></span><span class="zone-cell"></span><span class="zone-cell"></span>
+            <span class="zone-cell"></span><span class="zone-cell"></span><span class="zone-cell"></span>
+            <span class="zone-cell"></span><span class="zone-cell"></span><span class="zone-cell"></span>
+          </div>
+          <span class="zone-label">ABS STRIKE ZONE</span>
+          <span class="pitch-ball" id="pitch-ball" aria-hidden="true"></span>
+          <span class="field-label pitch-call" id="pitch-call" data-call="ready">투구를 기다리는 중</span>
+        </div>
+        <div class="play-area">
+          <p class="scene-label" id="scene-label">첫 번째 승부 · 0-0</p>
+          <p class="narrative" id="narrative"></p>
+          <div class="directive"><span>감독의 지시</span><strong id="directive"></strong></div>
+          <div class="choices" id="choices"></div>
+          <p class="message" id="message" role="status" aria-live="polite">사인을 확인하고 타석에서 선택하세요.</p>
+        </div>
+        <div class="history" aria-label="타석 기록">
+          <div class="history-head"><span>PLAY BY PLAY</span><span>타석 기록</span></div>
+          <div id="play-log"><div class="empty-history">아직 투구가 시작되지 않았습니다.</div></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>사인인가, 소신인가. 끝내기까지 한 타석.</span>
+      <div><button class="reset" id="reset" type="button" hidden><span aria-hidden="true">↻</span> 다시 시작</button><button class="change-lineup" id="change-lineup" type="button" hidden>선수 변경</button></div>
+    </footer>
+  </div>
+
+  <script>
+    const sceneLabel = document.querySelector('#scene-label');
+    const narrative = document.querySelector('#narrative');
+    const directive = document.querySelector('#directive');
+    const choices = document.querySelector('#choices');
+    const message = document.querySelector('#message');
+    const scoreDisplay = document.querySelector('#scoreline');
+    const countDisplay = document.querySelector('#count');
+    const outsDisplay = document.querySelector('#outs');
+    const playLog = document.querySelector('#play-log');
+    const pitchCountDisplay = document.querySelector('#pitch-count');
+    const pitchTypesDisplay = document.querySelector('#pitch-types');
+    const pitchBall = document.querySelector('#pitch-ball');
+    const pitchCall = document.querySelector('#pitch-call');
+    const batterAverageDisplay = document.querySelector('#batter-average');
+    const batterHitAtBatsDisplay = document.querySelector('#batter-hit-at-bats');
+    const batterPlateAppearancesDisplay = document.querySelector('#batter-plate-appearances');
+    const resetButton = document.querySelector('#reset');
+    const batterTeamSelect = document.querySelector('#batter-team-select');
+    const selectedBatterDisplay = document.querySelector('#selected-batter');
+    const pitcherSelect = document.querySelector('#pitcher-select');
+    const setupPanel = document.querySelector('#club-setup');
+    const scoreboardPanel = document.querySelector('#scoreboard');
+    const pitcherReportPanel = document.querySelector('#pitcher-report');
+    const batterReportPanel = document.querySelector('#batter-report');
+    const gamePanel = document.querySelector('#game-panel');
+    const startGameButton = document.querySelector('#start-game');
+    const changeLineupButton = document.querySelector('#change-lineup');
+    const pitcherNameDisplay = document.querySelector('#pitcher-name');
+    const batterNameDisplay = document.querySelector('#batter-name');
+    const awayTeamDisplay = document.querySelector('#away-team-label');
+    const homeTeamDisplay = document.querySelector('#home-team-label');
+    const batterStatsStorageKey = 'baseball-club-batter-stats';
+    const makePitch = (id, name, kind, usage, speed, zoneRate, whiff, chase, contact) => ({ id, name, kind, usage, speed, zoneRate, whiff, chase, contact });
+    const kboClubs = [
+      { id: 'doosan', name: '두산 베어스', hitter: '양의지', closer: { name: '김택연', hand: '우완', pitchCount: 21, fatigueThreshold: 28, pitches: [makePitch('four-seam', '포심 직구', 'fastball', 48, 151, 0.68, 0.12, 0.17, 0.34), makePitch('slider', '슬라이더', 'breaking', 30, 139, 0.54, 0.2, 0.3, 0.22), makePitch('splitter', '스플리터', 'off-speed', 22, 140, 0.56, 0.18, 0.27, 0.25)] } },
+      { id: 'lg', name: 'LG 트윈스', hitter: '오스틴 딘', closer: { name: '유영찬', hand: '우완', pitchCount: 19, fatigueThreshold: 29, pitches: [makePitch('four-seam', '포심 직구', 'fastball', 52, 150, 0.69, 0.12, 0.16, 0.35), makePitch('slider', '슬라이더', 'breaking', 28, 137, 0.55, 0.18, 0.3, 0.23), makePitch('splitter', '스플리터', 'off-speed', 20, 137, 0.58, 0.17, 0.26, 0.27)] } },
+      { id: 'kt', name: 'KT 위즈', hitter: '멜 로하스 주니어', closer: { name: '박영현', hand: '우완', pitchCount: 16, fatigueThreshold: 27, pitches: [makePitch('four-seam', '포심 직구', 'fastball', 47, 152, 0.67, 0.13, 0.17, 0.33), makePitch('slider', '슬라이더', 'breaking', 27, 137, 0.53, 0.2, 0.31, 0.22), makePitch('curve', '커브', 'breaking', 26, 126, 0.59, 0.17, 0.25, 0.27)] } },
+      { id: 'ssg', name: 'SSG 랜더스', hitter: '최정', closer: { name: '조병현', hand: '우완', pitchCount: 20, fatigueThreshold: 28, pitches: [makePitch('four-seam', '포심 직구', 'fastball', 50, 150, 0.66, 0.12, 0.18, 0.34), makePitch('slider', '슬라이더', 'breaking', 32, 137, 0.55, 0.2, 0.29, 0.22), makePitch('curve', '커브', 'breaking', 18, 124, 0.6, 0.16, 0.24, 0.28)] } },
+      { id: 'nc', name: 'NC 다이노스', hitter: '맷 데이비슨', closer: { name: '이용찬', hand: '우완', pitchCount: 23, fatigueThreshold: 30, pitches: [makePitch('four-seam', '포심 직구', 'fastball', 48, 146, 0.7, 0.1, 0.15, 0.36), makePitch('splitter', '포크볼', 'off-speed', 32, 132, 0.56, 0.2, 0.29, 0.23), makePitch('slider', '슬라이더', 'breaking', 20, 132, 0.57, 0.17, 0.27, 0.27)] } },
+      { id: 'kia', name: 'KIA 타이거즈', hitter: '나성범', closer: { name: '정해영', hand: '우완', pitchCount: 17, fatigueThreshold: 28, pitches: [makePitch('four-seam', '포심 직구', 'fastball', 52, 148, 0.7, 0.11, 0.15, 0.36), makePitch('slider', '슬라이더', 'breaking', 28, 134, 0.55, 0.19, 0.29, 0.24), makePitch('curve', '커브', 'breaking', 20, 124, 0.59, 0.17, 0.25, 0.27)] } },
+      { id: 'lotte', name: '롯데 자이언츠', hitter: '빅터 레이예스', closer: { name: '김원중', hand: '우완', pitchCount: 22, fatigueThreshold: 29, pitches: [makePitch('four-seam', '포심 직구', 'fastball', 48, 148, 0.66, 0.12, 0.17, 0.34), makePitch('splitter', '포크볼', 'off-speed', 30, 133, 0.56, 0.2, 0.3, 0.23), makePitch('slider', '슬라이더', 'breaking', 22, 136, 0.54, 0.18, 0.28, 0.25)] } },
+      { id: 'samsung', name: '삼성 라이온즈', hitter: '구자욱', closer: { name: '김재윤', hand: '우완', pitchCount: 18, fatigueThreshold: 28, pitches: [makePitch('four-seam', '포심 직구', 'fastball', 54, 146, 0.7, 0.11, 0.15, 0.37), makePitch('splitter', '포크볼', 'off-speed', 28, 133, 0.57, 0.19, 0.28, 0.24), makePitch('slider', '슬라이더', 'breaking', 18, 132, 0.56, 0.17, 0.26, 0.28)] } },
+      { id: 'hanwha', name: '한화 이글스', hitter: '노시환', closer: { name: '김서현', hand: '우완', pitchCount: 15, fatigueThreshold: 27, pitches: [makePitch('four-seam', '포심 직구', 'fastball', 58, 153, 0.61, 0.17, 0.2, 0.3), makePitch('slider', '슬라이더', 'breaking', 27, 140, 0.53, 0.21, 0.32, 0.21), makePitch('curve', '커브', 'breaking', 15, 128, 0.57, 0.18, 0.27, 0.25)] } },
+      { id: 'kiwoom', name: '키움 히어로즈', hitter: '송성문', closer: { name: '조상우', hand: '우완', pitchCount: 20, fatigueThreshold: 29, pitches: [makePitch('four-seam', '포심 직구', 'fastball', 49, 151, 0.67, 0.13, 0.16, 0.34), makePitch('slider', '슬라이더', 'breaking', 29, 137, 0.55, 0.19, 0.29, 0.23), makePitch('splitter', '포크볼', 'off-speed', 22, 134, 0.56, 0.18, 0.28, 0.25)] } },
+    ];
+    let repertoire = [];
+    let selectedBatterTeam;
+    let selectedPitcherClub;
+    let fatigueThreshold = 28;
+    let balls;
+    let strikes;
+    let pitchCount;
+    let previousPitch;
+    let finished;
+    let pitchInProgress = false;
+    let batterStats = { plateAppearances: 0, atBats: 0, hits: 0 };
+
+    function setupLineup() {
+      kboClubs.forEach((club) => {
+        const option = document.createElement('option');
+        option.value = club.id;
+        option.textContent = club.name;
+        batterTeamSelect.append(option);
+      });
+      batterTeamSelect.value = 'lg';
+      batterTeamSelect.addEventListener('change', updatePitcherOptions);
+      startGameButton.addEventListener('click', startGame);
+      resetButton.addEventListener('click', startGame);
+      changeLineupButton.addEventListener('click', () => {
+        setupPanel.hidden = false;
+        scoreboardPanel.hidden = true;
+        pitcherReportPanel.hidden = true;
+        batterReportPanel.hidden = true;
+        gamePanel.hidden = true;
+        resetButton.hidden = true;
+        changeLineupButton.hidden = true;
+      });
+      updatePitcherOptions();
+    }
+
+    function updatePitcherOptions() {
+      const batterClub = kboClubs.find((club) => club.id === batterTeamSelect.value);
+      if (!batterClub) return;
+      const previousSelection = pitcherSelect.value;
+      pitcherSelect.replaceChildren();
+      kboClubs.filter((club) => club.id !== batterClub.id).forEach((club) => {
+        const option = document.createElement('option');
+        option.value = club.id;
+        option.textContent = `${club.name} · ${club.closer.name}`;
+        pitcherSelect.append(option);
+      });
+      pitcherSelect.value = kboClubs.some((club) => club.id === previousSelection && club.id !== batterClub.id)
+        ? previousSelection
+        : kboClubs.find((club) => club.id !== batterClub.id).id;
+      selectedBatterDisplay.textContent = `4번 타자 · ${batterClub.hitter}`;
+    }
+
+    function startGame() {
+      selectedBatterTeam = kboClubs.find((club) => club.id === batterTeamSelect.value);
+      selectedPitcherClub = kboClubs.find((club) => club.id === pitcherSelect.value && club.id !== selectedBatterTeam.id);
+      if (!selectedBatterTeam || !selectedPitcherClub) return;
+      repertoire = selectedPitcherClub.closer.pitches;
+      fatigueThreshold = selectedPitcherClub.closer.fatigueThreshold;
+      batterStats = loadBatterStats(selectedBatterTeam.id);
+      setupPanel.hidden = true;
+      scoreboardPanel.hidden = false;
+      pitcherReportPanel.hidden = false;
+      batterReportPanel.hidden = false;
+      gamePanel.hidden = false;
+      resetButton.hidden = false;
+      changeLineupButton.hidden = false;
+      resetButton.disabled = false;
+      changeLineupButton.disabled = false;
+      pitcherNameDisplay.textContent = `${selectedPitcherClub.closer.name} · ${selectedPitcherClub.closer.hand}`;
+      batterNameDisplay.textContent = selectedBatterTeam.hitter;
+      awayTeamDisplay.textContent = selectedPitcherClub.name;
+      homeTeamDisplay.textContent = selectedBatterTeam.name;
+      balls = 0;
+      strikes = 0;
+      pitchCount = selectedPitcherClub.closer.pitchCount;
+      previousPitch = null;
+      finished = false;
+      pitchInProgress = false;
+      pitchBall.classList.remove('in-flight');
+      pitchCall.dataset.call = 'ready';
+      pitchCall.textContent = '투구를 기다리는 중';
+      scoreDisplay.innerHTML = '4 <small>-</small> 4';
+      outsDisplay.innerHTML = '2<small>/3</small>';
+      countDisplay.innerHTML = '0<small>-</small>0';
+      sceneLabel.textContent = '첫 번째 승부 · 0-0';
+      narrative.textContent = '9회말 2아웃, 주자는 모두 찼고 점수는 4대 4. 덕아웃에서 감독의 사인이 나온다. 상대 투수는 초구부터 승부를 걸어올 듯하다.';
+      directive.textContent = '초구 직구를 노려. 망설이지 말고 적극적으로 스윙해.';
+      message.textContent = '사인을 확인하고 타석에서 선택하세요.';
+      playLog.innerHTML = '<div class="empty-history">아직 투구가 시작되지 않았습니다.</div>';
+      updateBatterStats();
+      updatePitchCount();
+      renderChoices();
+    }
+
+    function renderChoices() {
+      choices.replaceChildren();
+      const plan = coachPlan();
+      directive.textContent = `감독 사인: ${pitchName(plan.pitch)} 예상. ${plan.text}`;
+
+      repertoire.forEach((pitch, index) => {
+        const button = document.createElement('button');
+        button.className = 'choice';
+        button.type = 'button';
+        button.innerHTML = `<span class="choice-mark">${index + 1}</span><span><span class="choice-title">${pitch.name} 예상</span><span class="choice-detail">구사율 ${pitch.usage}% · ${pitch.speed}km/h</span></span><span class="choice-arrow" aria-hidden="true">→</span>`;
+        button.addEventListener('click', () => play('swing', `${pitch.name} 예상`, pitch.id));
+        choices.append(button);
+      });
+
+      const waitButton = document.createElement('button');
+      waitButton.className = 'choice wait';
+      waitButton.type = 'button';
+      waitButton.innerHTML = '<span class="choice-mark">볼</span><span><span class="choice-title">공을 지켜본다</span><span class="choice-detail">스윙하지 않고 볼·스트라이크를 확인한다</span></span><span class="choice-arrow" aria-hidden="true">→</span>';
+      waitButton.addEventListener('click', () => play('take', '공을 지켜봄'));
+      choices.append(waitButton);
+    }
+
+    function coachPlan() {
+      if (strikes === 2) return { pitch: 'slider', text: '투 스트라이크. 유인구 슬라이더를 조심해.' };
+      if (balls === 3) return { pitch: 'four-seam', text: '볼넷 하나면 끝내기야. 직구가 와도 존을 벗어나면 참아.' };
+      if (balls >= 2) return { pitch: 'four-seam', text: '유리한 카운트야. 승부구 직구를 노려.' };
+      if (previousPitch === 'slider') return { pitch: 'four-seam', text: '방금 변화구를 던졌어. 이번엔 직구를 기다려 봐.' };
+      return { pitch: 'four-seam', text: '초구는 직구 비율이 높아. 노려볼 만해.' };
+    }
+
+    function pitchName(pitchId) {
+      return repertoire.find((pitch) => pitch.id === pitchId)?.name ?? '직구';
+    }
+
+    function updateCount() {
+      countDisplay.innerHTML = `${balls}<small>-</small>${strikes}`;
+    }
+
+    function loadBatterStats(clubId) {
+      const emptyStats = { plateAppearances: 0, atBats: 0, hits: 0 };
+      try {
+        const savedStats = JSON.parse(localStorage.getItem(`${batterStatsStorageKey}:${clubId}`));
+        if (!savedStats || !Number.isInteger(savedStats.plateAppearances) || !Number.isInteger(savedStats.atBats) || !Number.isInteger(savedStats.hits)) return emptyStats;
+        if (savedStats.hits < 0 || savedStats.atBats < savedStats.hits || savedStats.plateAppearances < savedStats.atBats) return emptyStats;
+        return savedStats;
+      } catch {
+        return emptyStats;
+      }
+    }
+
+    function updateBatterStats() {
+      const average = batterStats.atBats === 0 ? '.000' : (batterStats.hits / batterStats.atBats).toFixed(3).replace(/^0/, '');
+      batterAverageDisplay.textContent = average;
+      batterHitAtBatsDisplay.textContent = `${batterStats.hits} / ${batterStats.atBats}`;
+      batterPlateAppearancesDisplay.textContent = String(batterStats.plateAppearances);
+    }
+
+    function recordPlateAppearance(outcome) {
+      batterStats.plateAppearances += 1;
+      if (outcome !== 'walk') batterStats.atBats += 1;
+      if (outcome === 'hit') batterStats.hits += 1;
+      try {
+        localStorage.setItem(`${batterStatsStorageKey}:${selectedBatterTeam.id}`, JSON.stringify(batterStats));
+      } catch {
+        message.textContent = '기록을 브라우저에 저장하지 못했습니다.';
+      }
+      updateBatterStats();
+    }
+
+    function updatePitchCount() {
+      pitchCountDisplay.textContent = `${pitchCount}구`;
+      pitchTypesDisplay.replaceChildren();
+      repertoire.forEach((pitch) => {
+        const row = document.createElement('div');
+        row.className = 'pitch-type';
+        const label = document.createElement('span');
+        label.textContent = `${pitch.name} · ${pitch.speed}km/h`;
+        const usage = document.createElement('strong');
+        usage.textContent = `${pitch.usage}%`;
+        const meter = document.createElement('div');
+        meter.className = 'pitch-meter';
+        const bar = document.createElement('span');
+        bar.style.width = `${pitch.usage}%`;
+        meter.append(bar);
+        row.append(label, usage, meter);
+        pitchTypesDisplay.append(row);
+      });
+    }
+
+    function throwPitch() {
+      const weightedPitches = repertoire.map((pitch) => {
+        let weight = pitch.usage;
+        if (strikes === 2 && pitch.id === 'slider') weight *= 1.45;
+        if (balls === 3 && pitch.id === 'four-seam') weight *= 1.35;
+        if (pitch.id === previousPitch) weight *= 0.45;
+        return { pitch, weight };
+      });
+      const totalWeight = weightedPitches.reduce((total, item) => total + item.weight, 0);
+      let selection = Math.random() * totalWeight;
+      const selected = weightedPitches.find(({ weight }) => (selection -= weight) <= 0)?.pitch ?? repertoire[0];
+      previousPitch = selected.id;
+      pitchCount += 1;
+      updatePitchCount();
+
+      const fatigue = Math.max(0, pitchCount - fatigueThreshold) * 0.018;
+      const inZone = Math.random() < Math.max(0.25, selected.zoneRate - fatigue);
+      return { ...selected, inZone, location: pitchLocation(inZone) };
+    }
+
+    function pitchLocation(inZone) {
+      if (inZone) return { x: 39 + Math.random() * 22, y: 32 + Math.random() * 38 };
+      const edge = Math.floor(Math.random() * 4);
+      if (edge === 0) return { x: 27 + Math.random() * 5, y: 35 + Math.random() * 28 };
+      if (edge === 1) return { x: 68 + Math.random() * 5, y: 35 + Math.random() * 28 };
+      if (edge === 2) return { x: 41 + Math.random() * 18, y: 14 + Math.random() * 5 };
+      return { x: 41 + Math.random() * 18, y: 84 + Math.random() * 5 };
+    }
+
+    async function animatePitch(pitch) {
+      pitchBall.classList.remove('in-flight');
+      pitchBall.style.setProperty('--landing-x', `${pitch.location.x}%`);
+      pitchBall.style.setProperty('--landing-y', `${pitch.location.y}%`);
+      pitchCall.dataset.call = 'flight';
+      pitchCall.textContent = `${pitch.name} · ${pitch.speed}km/h`;
+      void pitchBall.offsetWidth;
+      pitchBall.classList.add('in-flight');
+      await new Promise((resolve) => {
+        pitchBall.onanimationend = resolve;
+        setTimeout(resolve, 950);
+      });
+      pitchBall.onanimationend = null;
+      pitchCall.dataset.call = pitch.inZone ? 'strike' : 'ball';
+      pitchCall.textContent = pitch.inZone ? 'ABS · STRIKE' : 'ABS · BALL';
+    }
+
+    function recordPlay(decision, result) {
+      const empty = playLog.querySelector('.empty-history');
+      if (empty) empty.remove();
+      const row = document.createElement('div');
+      row.className = 'history-row';
+      const situation = document.createElement('span');
+      situation.textContent = `${balls}-${strikes}`;
+      const details = document.createElement('span');
+      details.className = 'result';
+      details.textContent = `${decision}: ${result}`;
+      row.append(situation, details);
+      playLog.prepend(row);
+    }
+
+    function continueAtBat(decision, result, nextNarrative, pitch) {
+      updateCount();
+      recordPlay(decision, `${pitch.name} ${pitch.speed}km/h · ${result}`);
+      sceneLabel.textContent = `다음 승부 · ${balls}-${strikes}`;
+      narrative.textContent = `${pitch.name} ${pitch.speed}km/h. ${nextNarrative}`;
+      const plan = coachPlan();
+      directive.textContent = `감독 사인: ${pitchName(plan.pitch)} 예상. ${plan.text}`;
+      message.textContent = `${balls}볼 ${strikes}스트라이크. 다음 공을 선택하세요.`;
+      renderChoices();
+    }
+
+    function endGame(decision, result, ending, homeScore = 4, thirdOut = false, pitch, outcome = 'out') {
+      finished = true;
+      recordPlateAppearance(outcome);
+      scoreDisplay.innerHTML = `4 <small>-</small> ${homeScore}`;
+      if (thirdOut) outsDisplay.innerHTML = '3<small>/3</small>';
+      updateCount();
+      recordPlay(decision, `${pitch.name} ${pitch.speed}km/h · ${result}`);
+      sceneLabel.textContent = '경기 종료';
+      narrative.textContent = ending;
+      directive.textContent = '당신의 선택으로 이 타석이 끝났습니다.';
+      message.textContent = '새 경기를 시작하면 다른 승부를 만날 수 있습니다.';
+      choices.replaceChildren();
+    }
+
+    function addStrike(decision, result, pitch) {
+      strikes += 1;
+      if (strikes === 3) {
+        endGame(decision, result, '심판의 손이 올라간다. 삼진 아웃, 경기는 그대로 끝났다. 감독의 사인과 당신의 판단 중 무엇이 옳았는지는 이제 기록에 남을 뿐이다.', 4, true, pitch);
+      } else {
+        continueAtBat(decision, result, '포수가 공을 돌려준다. 투수는 다음 공을 준비하고, 주자들은 리드 폭을 조금 넓힌다. 아직 승부는 끝나지 않았다.', pitch);
+      }
+    }
+
+    async function play(action, decision, prediction) {
+      if (finished || pitchInProgress) return;
+      pitchInProgress = true;
+      Array.from(choices.children).forEach((button) => { button.disabled = true; });
+      resetButton.disabled = true;
+      changeLineupButton.disabled = true;
+      const pitch = throwPitch();
+      await animatePitch(pitch);
+      pitchInProgress = false;
+      resetButton.disabled = false;
+      changeLineupButton.disabled = false;
+      if (finished) return;
+      choices.replaceChildren();
+
+      if (action === 'take') {
+        if (!pitch.inZone) {
+          balls += 1;
+          if (balls === 4) {
+            endGame(decision, '밀어내기 볼넷', '공 네 개가 포수 미트에 들어오지 않는다. 타자는 1루로 걸어 나가고 3루 주자가 홈을 밟는다. 5대 4, 끝내기 밀어내기 볼넷이다.', 5, false, pitch, 'walk');
+          } else {
+            continueAtBat(decision, '볼', '바깥쪽으로 빠지는 공. 주자들은 움직임을 멈추고, 투수는 포수의 사인을 다시 확인한다.', pitch);
+          }
+        } else {
+          addStrike(decision, '루킹 스트라이크', pitch);
+        }
+        return;
+      }
+
+      const predictionCorrect = pitch.id === prediction;
+      const roll = Math.random();
+      const baseWhiffChance = pitch.inZone ? pitch.whiff : pitch.chase;
+      const whiffChance = Math.max(0.03, baseWhiffChance + (predictionCorrect ? -0.06 : 0.04));
+      if (roll < whiffChance) {
+        addStrike(decision, `${pitch.name} 헛스윙${predictionCorrect ? ' · 예측 적중' : ''}`, pitch);
+      } else if (roll < whiffChance + 0.24) {
+        if (strikes < 2) strikes += 1;
+        continueAtBat(decision, `파울${predictionCorrect ? ' · 예측 적중' : ''}`, '타구가 1루 덕아웃 쪽으로 빗나간다. 파울로 카운트가 이어지고, 투수는 다시 공을 쥔다.', pitch);
+      } else {
+        const contact = Math.random();
+        const fatigueBonus = pitchCount > fatigueThreshold ? 0.06 : 0;
+        const singleChance = pitch.contact + fatigueBonus + (predictionCorrect ? 0.2 : 0);
+        const predictionText = predictionCorrect ? '예측한 구종을 정확히 노렸다. ' : `${pitchName(prediction)} 예상은 빗나갔다. `;
+        if (contact < singleChance) {
+          endGame(decision, '끝내기 안타', `${predictionText}배트 중심에 맞은 타구가 외야 앞에 떨어진다. 3루 주자가 홈을 밟고, 5대 4 끝내기 안타!`, 5, false, pitch, 'hit');
+        } else if (contact < singleChance + 0.13) {
+          endGame(decision, '끝내기 2루타', `${predictionText}타구가 좌중간을 가르고 담장 앞까지 굴러간다. 주자들이 홈을 밟으며 7대 4!`, 7, false, pitch, 'hit');
+        } else if (contact < singleChance + 0.16) {
+          endGame(decision, '끝내기 만루 홈런', `${predictionText}타구가 담장을 넘어간다! 8대 4, 끝내기 만루 홈런!`, 8, false, pitch, 'hit');
+        } else {
+          endGame(decision, '내야 땅볼 아웃', `${predictionText}빗맞은 타구가 투수 앞으로 굴러간다. 1루 송구, 아웃. 경기는 4대 4로 끝난다.`, 4, true, pitch);
+        }
+      }
+    }
+
+    setupLineup();
+  </script>
+</body>
+</html>
